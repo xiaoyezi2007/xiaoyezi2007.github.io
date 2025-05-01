@@ -77,6 +77,444 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-北航2025面向对象第二单元" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2025/05/01/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%BA%8C%E5%8D%95%E5%85%83/" class="article-date">
+  <time class="dt-published" datetime="2025-05-01T15:53:58.000Z" itemprop="datePublished">2025-05-01</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2025/05/01/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%BA%8C%E5%8D%95%E5%85%83/">北航2025面向对象第二单元</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="北航2025面向对象第二单元"><a href="#北航2025面向对象第二单元" class="headerlink" title="北航2025面向对象第二单元"></a>北航2025面向对象第二单元</h1><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>本单元的基本任务是用多线程解决电梯调度问题，并实现临时调度指令与双轿厢升级指令。</p>
+<p>在第一单元过于追求优化性能反而丢了两次正确性分以后，我决定改变策略尽量追求代码简洁清晰，逻辑明确，尽量保证正确性。</p>
+<h3 id="基本架构"><a href="#基本架构" class="headerlink" title="基本架构"></a>基本架构</h3><p>本单元作业没有进行重构，最终架构如下：</p>
+<p><img src="/../image/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%BA%8C%E5%8D%95%E5%85%83/image-20250418101705398.png" alt="image-20250418101705398"></p>
+<p>简化一下图，大致架构如下：</p>
+<p><img src="/../image/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%BA%8C%E5%8D%95%E5%85%83/image-20250418101839682.png" alt="image-20250418101839682"></p>
+<p>输入线程输入后，将请求传递给RequestQueue，受到请求后通知Dispatch线程，调度器作为消费者从RequestQueue中获取请求并根据调度策略分配给正确的电梯，调度器作为生产者给ElevatorQueue提供请求。收到请求后访问策略类决定电梯的行动步骤，而后指导电梯线程运行。</p>
+<p>第二次作业加入了临时调度，要求电梯立即移动到某一楼层。可以把该操作看成电梯的原子操作，若请求队列里面收到了临时调度请求，那么立即通知电梯进行临时调度操作即可。另外乘客有可能中途下电梯，应当将这种乘客送回RequestQueue重新调度。</p>
+<p>第三次作业加入了双轿厢请求，要求可以将原本两个单轿厢电梯放到一个电梯井里变成双轿厢电梯。我通过新建共享类的方式解决了该问题：</p>
+<p><img src="/../image/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%BA%8C%E5%8D%95%E5%85%83/image-20250418102627771.png" alt="image-20250418102627771"></p>
+<p>SameWell类是一个丑陋的名字，连接了两个同在一个电梯井中的电梯。具体来说，双轿厢的危险点在于两个轿厢可能会在交叉的楼层发生碰撞。因此，在某个电梯轿厢要进入危险楼层时，应当先询问共享类能否进入。若共享类判断危险楼层没有轿厢，可以放行通过，反之则应该告诉该轿厢等待并发出一个催促信号。任意轿厢在危险楼层时都应该检查有无催促信号，如果存在催促信号则要在关门后立即离开危险楼层。</p>
+<p>针对这一部分只需要在共享类里面实现两个Boolean类型的信号，如busy与quickly信号。进入危险楼层时置busy为1，想进入危险楼层时置quickly为1，需要判断能否进入和是否需要离开时写两个方法判断即可。</p>
+<p>UML协作图大致如下：</p>
+<p>主线程：</p>
+<p><img src="/../image/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%BA%8C%E5%8D%95%E5%85%83/MainClass_main.png" alt="MainClass_main"></p>
+<p>调度器线程：</p>
+<p><img src="/../image/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%BA%8C%E5%8D%95%E5%85%83/Dispatch_run.png" alt="Dispatch_run"></p>
+<p>电梯线程：</p>
+<p><img src="/../image/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%BA%8C%E5%8D%95%E5%85%83/Elevator_run.png" alt="Elevator_run"></p>
+<p>图很长略显复杂，因此解决线程之间的各类竞争问题显得尤为重要。</p>
+<h3 id="同步和锁"><a href="#同步和锁" class="headerlink" title="同步和锁"></a>同步和锁</h3><p>需要这一部分的关键是线程之间运行的速度和顺序是不确定的，因而如果调用了相同的变量，可能会产生不确定的效果。本人在此单元作业中仅使用了synchronized关键字修饰整个方法的方式处理多线程并发问题。</p>
+<p>总结出一个加锁的原则是，在托盘类或者共享类中，许多变量是受两个线程共同使用的，例如请求队列、双轿厢中的busy与quickly等，因此在涉及到这些内容的方法都应该加锁，从而实现对这些量的调用安全。</p>
+<p>另外，对读写锁进行了了解。读写锁即是将锁分成了读锁与写锁两类。lock.readlock()与lock.writelock()。当有人持有写锁时，其余人均不得进入。而无人持有写锁时，那么所有被上了读锁的方法可以同时读，写锁不得进入。是一个读写公平的上锁方式，由于允许了同时读取，提高了多线程的运行效率。</p>
+<p>wait()&#x2F;notify()的方式在我的代码中用来调控线程运行。当一个线程需要等待时，应当wait，wait可以释放出所有持有的锁交给别人，wait需要他人notify，也可以在括号中设置wait的最大时间，线程将在时间到时自动醒来。这种方式可以有效避免轮询浪费CPU时间。</p>
+<p>需要注意的是，notify只会叫醒所有有相同监视器管辖的对象，简单来说，如果有两个上锁的方法一个想叫醒另一个，他俩必须有共同使用的变量。如果他俩毫不相干，那notify是我无效的。第一次作业时我希望让电梯等待时，直接开了一个新方法里面只有一个wait()，然后这个电梯再也醒不过来了。<del>你永远叫不醒一个装睡的线程！</del></p>
+<h3 id="策略"><a href="#策略" class="headerlink" title="策略"></a>策略</h3><p>策略可以分为两部分，一个是决定请求分配给哪个电梯的调度策略，一个是对于单个电梯根据自己的候乘表决定如何运行的运行策略。</p>
+<h4 id="运行策略"><a href="#运行策略" class="headerlink" title="运行策略"></a>运行策略</h4><p>采用LOOK策略改。电梯不断在楼层之间“扫描”，电梯只捎带想去楼层的方向与电梯行进方向相同的乘客。若电梯行进方向前放没有乘客，并且电梯内部没有乘客了，那么电梯掉头。如果候乘表为空，那么电梯休息。如果电梯满员了但还有人要上，则先请优先级较高的乘客上电梯。由于本次作业存在优先级机制，因此在电梯开始运动的时候应当考虑一下往哪边运动。</p>
+<p><img src="/../image/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%BA%8C%E5%8D%95%E5%85%83/image-20250418161832475.png" alt="image-20250418161832475"></p>
+<p>如图所示，如果电梯上方和下方都有人等待电梯，那么电梯先向下运行于先向上运行相比，上方的乘客多等待的时间大约就是电梯向下走到最低楼层的时间的两倍（忽略开关门）。并且考虑到时间的加权公式为：</p>
+<p>$WT&#x3D;\frac{ {\textstyle \sum_{i}^{}(t_i\times w_i)} }{\textstyle \sum_{i}^{}w_i} $</p>
+<p>因此可以考虑比较</p>
+<p>$ {\textstyle \sum_{up}^{}w*(Floor_{now}-Floor_{min})} $</p>
+<p>$ {\textstyle \sum_{down}^{}w*(Floor_{max}-Floor_{now})} $</p>
+<p>两个式子的大小判断电梯从休息状态启动时应该往哪里走，该过程还可以用前缀与后缀和优化。</p>
+<p>此外，考虑到性能分还需要考虑耗电量，而专门为贵客开关门实在是浪费宝贵的电力资源。所以从环保的角度考虑，只在必须开门的时候做好优先级处理即可。</p>
+<h4 id="调度策略"><a href="#调度策略" class="headerlink" title="调度策略"></a>调度策略</h4><p>首先给空电梯分配（不过现在想来这一条最简单的策略是最不合理的，这即增加了巨额耗电量，又实际上没怎么提升时间性能）。</p>
+<p>其次考察双轿厢，如果一个乘客请求的起始楼层与目标楼层均在一个轿厢的，那可以优先分配给这一个轿厢，因为双轿厢的速度更快。</p>
+<p>再其次，如果乘客在与某个电梯当前行进方向相同，并且该行进方向上所有的候乘乘客电梯可以被电梯一趟接完，那么该乘客可以加入该电梯候乘表。</p>
+<p>最后，若没有电梯满足上述条件，直接分配个人最少的电梯。</p>
+<p>另外，考虑到必要的正确性，应当要求单个电梯不能同时接受太多的乘客请求，静默的电梯不能接受请求，双轿厢电梯不能接受接不到的乘客的请求等等。</p>
+<h3 id="bug与debug"><a href="#bug与debug" class="headerlink" title="bug与debug"></a>bug与debug</h3><p>第一次作业未出现bug，也未成功hack他人。</p>
+<p>第二次作业出现了三个bug：</p>
+<p>其一，乘客中途下电梯时我通过记录其当前楼层将其送回调度器重新分配，但这个记录没有深克隆。</p>
+<p>其二，临时调度时如果乘客顺路，我会将该乘客请进电梯，然而这个过程没有判断是否满员。</p>
+<p>其三，如果最后只有临时调度，那我的截至条件将无法判断。</p>
+<p>这三个bug直接让我未进入强测，但是由于某些原因，我成功hack出了一些bug</p>
+<p>其一，有一位同学同样是人处在错误的楼层，没准也是深克隆问题。</p>
+<p>其二，有一位同学在输入很多乘客后同时对6部电梯临时调度，并同时再输入几位乘客，会出现TLE的问题。猜测调度逻辑有误。</p>
+<p>第三次作业出现了一个bug：</p>
+<p>对于程序终止的判断有误，乘客中途下车并重新调度的空挡可能出现线程问题，并且未考虑仅有update的情况。</p>
+<p>这个bug在强测中未被测出，进入互测后hack了三个bug：</p>
+<p>其一，有一位同学的双轿厢电梯中某个轿厢会越过限制，猜测判断条件的优先级有误。</p>
+<p>其二，有一位同学的调度器会出现空指针异常，很奇怪的bug猜测不出问题。</p>
+<p>其三，有一位同学的终止条件有问题，如果最后一条是update会提前终止程序。</p>
+<p>另外还有一位同学的乘客调度会出现错误，本地可以复现但未成功hack。<del>我十分心痛未能帮助该同学指出程序的bug，或许其如今还未能发现自己的程序并不完善，深表遗憾！</del></p>
+<p>我的Debug方法并不完善，通常是直接思考代码逻辑+肉眼。其实效果不错，都能很快的找到bug，但问题在于出错了才能找到bug。第三次作业手搓了一个评测机，正确率大幅提升。</p>
+<h3 id="心得体会"><a href="#心得体会" class="headerlink" title="心得体会"></a>心得体会</h3><p>线程安全问题需要反复思考，思考所有情况下是否能保证变量的读写不混乱。实际上着重保证共享类或者托盘类的线程安全即可。</p>
+<p>层次化设计是要将问题进行提炼，满足高内聚低耦合的基本设计原则，追求代码的简洁性。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2025/05/01/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%BA%8C%E5%8D%95%E5%85%83/" data-id="cma5jv38f0007jwts1rc38pub" data-title="北航2025面向对象第二单元" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-北航2025面向对象第一单元" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2025/05/01/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%B8%80%E5%8D%95%E5%85%83/" class="article-date">
+  <time class="dt-published" datetime="2025-05-01T15:50:30.000Z" itemprop="datePublished">2025-05-01</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2025/05/01/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%B8%80%E5%8D%95%E5%85%83/">北航2025面向对象第一单元</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="北航2025面向对象第一单元"><a href="#北航2025面向对象第一单元" class="headerlink" title="北航2025面向对象第一单元"></a>北航2025面向对象第一单元</h1><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>本单元的基本任务是完成含变量、三角、导数和自定义函数的带幂次表达式解析并展开所有括号。额外任务是将展开后的表达式化简使其尽可能简短。</p>
+<p>在经过先导课程的洗礼之后，第一次作业一上来还是极其手足无措的，不过好在，我通过三次迭代逐渐体会到了面向对象的感觉。</p>
+<h3 id="基本架构"><a href="#基本架构" class="headerlink" title="基本架构"></a>基本架构</h3><p>在main类中按时间依次执行读入、解析、展开化简、输出四个步骤。</p>
+<p>建立表达式、项、因子三个类（没有像其他很多同学设置单项式和多项式类，我认为单项式和多项式都可以视作表达式直接处理），这三个类相互协作即可完成全部任务。</p>
+<p>​	1.读入部分：scanner依次读入自定义函数和需要化简的表达式，并转化为不同Token</p>
+<p>​	2.解析：利用递归下降写parser类，向下解析每一层表达式。</p>
+<p>​	3.展开化简：核心是写一个simplified方法，表达式的simplified即可向下转化成若干项的simplified，项的simplified又可以向下转化成若干因子的simplified。所有simplified都返回一个表达式，这样可以将展开化简转化成表达式之间的运算。一个简单的思维导图如下：</p>
+<p><img src="/../image/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%B8%80%E5%8D%95%E5%85%83%E5%8D%9A%E5%AE%A2%E4%BD%9C%E4%B8%9A/image-20250320143033393.png" alt="image-20250320143033393"></p>
+<p>​	4.输出：递归下降输出每一个实例，并对项之间的输出顺序做简单调整。</p>
+<p>类图如下：</p>
+<p><img src="/../image/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%B8%80%E5%8D%95%E5%85%83/image-20250320145909121.png" alt="image-20250320145909121"></p>
+<p><img src="/../image/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%B8%80%E5%8D%95%E5%85%83/image-20250320150258983.png" alt="image-20250320150258983"></p>
+<p>采用IDEA生成类和方法，再自行根据调用连接箭头的方式画出了类图。就美观而言我认为类图还是相对比较优美的，形成了一个扎实对称的三角形，具有很强的稳定性。</p>
+<p>考虑如果未来变量不止存在x，三角因子和函数调用内部不止输入因子，我的代码都可以快速实现。若幂次允许存在变量，由于我设置了power类也可以快速实现。若需要添加新的因子如数列求和因子等，则可类似加入求导因子一般，建立一个新的因子类与因子接口连接，实现所有接口内的方法即可。</p>
+<p>下面我将具体分析我的迭代过程：</p>
+<h3 id="第一次迭代"><a href="#第一次迭代" class="headerlink" title="第一次迭代"></a>第一次迭代</h3><h4 id="我的实现"><a href="#我的实现" class="headerlink" title="我的实现"></a>我的实现</h4><p>第一次作业只需要实现多项式化简，也许正是因为这一点，许多同学直接新建多项式和单项式类。我考虑到单项式的可拓展性较差，不如直接对Term化简，也能完成相似的任务。同时我还考虑了一些未来可能出现的情况，如需要化简一个多变量表达式。对此，我的Term必然需要采用Arraylist存储不同的因子，而非直接用HashMap存储系数和幂次（虽然第一次作业只可能出现一个Factor），另外，在合并时直接遍历所有的非常熟Factor是否相同再进行合并即可。正是这一步考虑让我后面的迭代不存在任何重构。</p>
+<p>对于其他实现上的细节：</p>
+<p>1.Term类中需要写一个getNum方法，以快速找到常数项（这是没有写单项式类需要额外做的唯一事情），若没有常数项则填一个1上去。</p>
+<p>2.我给变量参数x和指数power都额外设置了一个类，以防后续会在指数和变量上做文章，结果来看属于冗余设计。</p>
+<h4 id="Bug-Hack"><a href="#Bug-Hack" class="headerlink" title="Bug &amp; Hack"></a>Bug &amp; Hack</h4><p>由于许久没有写Java程序了，在代码中犯了一个重大错误：部分分析没有深克隆，导致方法中的运算改变了方法的参数。该bug我在写完全部程序才发现，而debug的方式也非常简单，通过构造样例二分缩小范围，寻找数据在哪里意外发生变化即可。</p>
+<p>其余bug是对0次幂的处理不完全，在幂因子处没有换成1，属于低级错误。</p>
+<p>第一次作业只hack到一位同学，该同学对0次幂的处理有些问题，略微构造数据即可发现其问题。</p>
+<h4 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h4><p>进行普通的单项式合并后表达式已然化到最简，剩余的唯一一个优化是如果整个表达式中存在正的Term，则第一项先输出正项，从而少输出一个符号。该优化写在输出类中不会增加多少代码复杂度。</p>
+<h3 id="第二次迭代"><a href="#第二次迭代" class="headerlink" title="第二次迭代"></a>第二次迭代</h3><h4 id="我的实现-1"><a href="#我的实现-1" class="headerlink" title="我的实现"></a>我的实现</h4><p>鉴于我第一次的架构比较可拓展，添加一个三角因子没有造成任何影响，合并不同项仍然是判断因子是否全部相同。</p>
+<p>而自定义递归函数则稍显复杂。首先递归函数的解析比较暴力，需要一个一个手动跳过大括号，读入数字，再跳过小括号，读入各因子，再跳过等号，读入表达式等等。幸好这些只需要在一个输入类写完即可。而后我才用预处理的方式，先计算出所有不大于5的函数值，需要时直接用一个方法调用计算即可。由于调用时还需要用因子替换形式参数，所以需要再写一个replace方法，该方法读入形式参数和实际调用参数，向下递归调用深层的replace最终完成替换。注意一定要一次读入全部形式参数，依次替换可能会导致先替换y成x，而后再替换x时出现问题。</p>
+<h4 id="优化-1"><a href="#优化-1" class="headerlink" title="优化"></a>优化</h4><p>问题的重点来到了优化，参考评论区精华帖所提到的提取公因式方法，的确可以完成优化，然而过程实在比较复杂，大幅提高了我的代码复杂度，也为这次作业的失败埋下了雷。</p>
+<p><img src="/../image/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%B8%80%E5%8D%95%E5%85%83/image-20250320153416920.png" alt="image-20250320153416920"></p>
+<p>我通过这一页ppt展示了提取公因式的简短解释，思路简单。</p>
+<p>为同时实现两三角因子括号内因子若恰为相反数的合并。在提取公因式时可认为括号内差一个符号的三角因子也是相同的，并同步记录正负符号。</p>
+<p>而后判断不同的因子的情况：</p>
+<p>若完全没有不同的因子，则直接合并，也就是第一次作业的合并方式。</p>
+<p>若不同的因子恰构成了sin^2+cos^2，则选取系数绝对值较小的那个数，合并这么多的项转化成1.</p>
+<p>若不同的因子恰构成了1-sin^2或1-cos^2，且系数相同，则进行化简。</p>
+<p>若不同的因子恰构成了诸如sincos+cossin之类的和角公式且系数相同，则将括号内的表达式相加并合并成一项。</p>
+<p>合并多个项时，考虑到可能合并后再次参与合并。因此可以将合并后的新项压栈，完成合并后再对栈内的项进行二次合并。</p>
+<p>完成合并后，再输出之前，可以对单项进行简化。若三角因子括号中的项是一个因子加一个负号，则可以将负号吐出三角因子之外并去掉三角因子内的二层括号。</p>
+<h4 id="Bug-Hack-1"><a href="#Bug-Hack-1" class="headerlink" title="Bug&amp;Hack"></a>Bug&amp;Hack</h4><p>构造了一些样例，发现没问题后直接进去强测，然而直接挂了。实在非常痛苦。bug非常低级：因子的replace函数，将cos replace后产生的因子，由于复制粘贴，写成sin了，直接炸了十多个点。此外还有一个小bug是提取公因式时没有深克隆，故若出现类似sin^2cos+2cos^3之类的项时，cos会被新产生的两个项共用，没有分开。</p>
+<p>过了的点只有一个不是100分，然而这没有任何用。</p>
+<p>没进互测，自然没有什么hack经验，也正因没进互测，没有人帮我额外debug，给下一次作业再次埋雷。</p>
+<h3 id="第三次迭代"><a href="#第三次迭代" class="headerlink" title="第三次迭代"></a>第三次迭代</h3><h4 id="我的实现-2"><a href="#我的实现-2" class="headerlink" title="我的实现"></a>我的实现</h4><p>这次迭代再次体现了我架构的优异性，添加普通函数，只需要视作它是n&#x3D;0的递归函数即可。添加求导因子，在simplify时使用求导公式递归解决即可，用了一节早八一个小时就完成了这次迭代。</p>
+<h4 id="Bug-Hack-2"><a href="#Bug-Hack-2" class="headerlink" title="Bug&amp;Hack"></a>Bug&amp;Hack</h4><p>然而，第二次作业的bug发力了，由于我的三角因子创建实例时的接口设置成了factor，导致我每新建一个三角因子都要调用一下复杂度较高的simplify方法，并且我的代码其他地方也存在由于不放心而滥用simplify的现象，理所当然的，我被卡了TLE并被hack两次。</p>
+<p>实际上现在回头来看，在我的架构下，完全可以把三角因子内部的输入视作一个表达式，这样也省去了一步化简过程，减少时间消耗和程序复杂度，可惜当时为了和指导书保持一致没有采取这种方法</p>
+<p>hack别人时，主要针对新加的求导因子，将求导因子内部用0组合构造样例。</p>
+<h3 id="复杂度分析"><a href="#复杂度分析" class="headerlink" title="复杂度分析"></a>复杂度分析</h3><p>先通过IDEA分析类复杂度。</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>OCavg</th>
+<th>OCmax</th>
+<th>WMC</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DaoFactor</td>
+<td>1.08</td>
+<td>2</td>
+<td>14</td>
+</tr>
+<tr>
+<td>DefinedFunction</td>
+<td>1.5</td>
+<td>5</td>
+<td>12</td>
+</tr>
+<tr>
+<td>Expr</td>
+<td>2.63</td>
+<td>8</td>
+<td>50</td>
+</tr>
+<tr>
+<td>ExprFactor</td>
+<td>1.15</td>
+<td>3</td>
+<td>15</td>
+</tr>
+<tr>
+<td>FunctionFactor</td>
+<td>1.19</td>
+<td>3</td>
+<td>19</td>
+</tr>
+<tr>
+<td>Input</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Lexer</td>
+<td><font color='red'>5</font></td>
+<td>15</td>
+<td>25</td>
+</tr>
+<tr>
+<td>MainClass</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Num</td>
+<td>1.04</td>
+<td>2</td>
+<td>28</td>
+</tr>
+<tr>
+<td>Parser</td>
+<td>2.41</td>
+<td>7</td>
+<td>41</td>
+</tr>
+<tr>
+<td>Power</td>
+<td>1.15</td>
+<td>2</td>
+<td>15</td>
+</tr>
+<tr>
+<td>PowerFactor</td>
+<td>1.23</td>
+<td>3</td>
+<td>16</td>
+</tr>
+<tr>
+<td>Sign</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Term</td>
+<td><font color='red'>4</font></td>
+<td>11</td>
+<td>80</td>
+</tr>
+<tr>
+<td>Token</td>
+<td>1.25</td>
+<td>2</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Token.Type</td>
+<td>n&#x2F;a</td>
+<td>n&#x2F;a</td>
+<td>0</td>
+</tr>
+<tr>
+<td>TriFactor</td>
+<td>1.74</td>
+<td>6</td>
+<td>40</td>
+</tr>
+<tr>
+<td>Var</td>
+<td>1</td>
+<td>1</td>
+<td>5</td>
+</tr>
+</tbody></table>
+<p>从上表可以看出，复杂度较高的两个类分别是Lexer和Term。Lexer复杂度较高是因为有一串很长的if-else判断用于将输入转化成Token。Term复杂度很大则是因为在化简部分存在许多分支。</p>
+<p>下面是部分复杂方法的复杂度：</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>CogC</th>
+<th>ev(G)</th>
+<th>iv(G)</th>
+<th>v(G)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DefinedFunction.initial()</td>
+<td>12</td>
+<td>1</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Expr.combine()</td>
+<td>21</td>
+<td>4</td>
+<td>8</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Expr.print()</td>
+<td>12</td>
+<td>3</td>
+<td>7</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Lexer.Lexer(String)</td>
+<td>17</td>
+<td>1</td>
+<td>17</td>
+<td>17</td>
+</tr>
+<tr>
+<td>Lexer.checkStyle(String)</td>
+<td>13</td>
+<td>7</td>
+<td>8</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Term.integrate(Num, Term, Num)</td>
+<td>15</td>
+<td>7</td>
+<td>7</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Term.integrateAns(ArrayList&lt;Factor&gt;,  ArrayList&lt;Factor&gt;, ArrayList&lt;Factor&gt;, Num, Num, int, int)</td>
+<td>16</td>
+<td>8</td>
+<td>10</td>
+<td>12</td>
+</tr>
+<tr>
+<td>Term.print(boolean)</td>
+<td>15</td>
+<td>3</td>
+<td>10</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Term.solveTriFactor(Factor,  ArrayList&lt;Factor&gt;, ArrayList&lt;Factor&gt;, ArrayList&lt;Factor&gt;,  int, int)</td>
+<td>25</td>
+<td>4</td>
+<td>7</td>
+<td>11</td>
+</tr>
+<tr>
+<td>Average</td>
+<td>1.68</td>
+<td>1.29</td>
+<td>2</td>
+<td>2.11</td>
+</tr>
+</tbody></table>
+<p>solveTriFactor是一个对三角函数化简的方法，整体来看，复杂度最高的方法集中在化简部分。这再一次说明了化简有风险，debug需谨慎。抛开化简以外，全部方法的平均复杂度比较低，说明我的方法设计比较优美，可喜可贺。</p>
+<h3 id="心得体会"><a href="#心得体会" class="headerlink" title="心得体会"></a>心得体会</h3><p>第一单元的作业可以说是不太顺利，代码难度不高却因为一些简单的错误失去了很多分数。真情实感就是很难受。</p>
+<p>难受归难受，第一单元的作业也是让我体会到了面向对象的感觉，其核心就是要把各种“东西”看成一个整体，调用抽象的方法对其进行处理，所以递归是一种非常常用的方法。递归时不需要关注下一层如何实现，只需要完成本层的内容即可。</p>
+<p>此外，代码量也有所提升，虽然一个一个方法相互独立，但必须要规划好每一部分的功能方可比较轻松流畅的写完所有代码。</p>
+<p>表达式优化对代码复杂度带来了巨大的提升，导致正常的debug变得困难，需要debug的情况也变得极多。一个必要的处理方法是对化简单独新建一个类，专门处理化简问题。</p>
+<h3 id="课程改进建议"><a href="#课程改进建议" class="headerlink" title="课程改进建议"></a>课程改进建议</h3><p>无</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2025/05/01/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%B8%80%E5%8D%95%E5%85%83/" data-id="cma5jv38f0006jwts2cjyavs1" data-title="北航2025面向对象第一单元" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-2024面向对象程序设计与构造先导课心得" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2025/05/01/2024%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E4%B8%8E%E6%9E%84%E9%80%A0%E5%85%88%E5%AF%BC%E8%AF%BE%E5%BF%83%E5%BE%97/" class="article-date">
+  <time class="dt-published" datetime="2025-05-01T15:45:34.000Z" itemprop="datePublished">2025-05-01</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2025/05/01/2024%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E4%B8%8E%E6%9E%84%E9%80%A0%E5%85%88%E5%AF%BC%E8%AF%BE%E5%BF%83%E5%BE%97/">2024面向对象程序设计与构造先导课心得</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="2024面向对象程序设计与构造先导课心得"><a href="#2024面向对象程序设计与构造先导课心得" class="headerlink" title="2024面向对象程序设计与构造先导课心得"></a>2024面向对象程序设计与构造先导课心得</h1><h2 id="1-作业最终架构与迭代过程"><a href="#1-作业最终架构与迭代过程" class="headerlink" title="1.作业最终架构与迭代过程"></a>1.作业最终架构与迭代过程</h2><p>Mainclass主类尽可能短小，只放置指导书提供的输入解析，而后设置solve类对输入解析获得的Arraylist分析，根据操作的不同进行不同的处理。对于该冒险游戏的主体部分，必然需要建立冒险者、瓶子、装备这三个最主要的类，每个类中保存各自相关的数值。在迭代中，需要对初始的主体部分不断细化。例如瓶子和装备均有细分的类别，此时我使用子类的方式，每一个类型的瓶子或装备新建一个子类，在子类中重写使用后对冒险者产生的效果这一个方法即可方便的实现对不同类型物品的储存。</p>
+<p>在冒险者类中，背包系统为最为主要的部分，这刻画了冒险者与其他类的从属关系。我通过在Adventure类中建立HashMap的方式，将冒险者拥有的物品全部通过这些HashMap储存即可。同理，冒险者的雇佣关系可以看作是冒险者拥有了一个冒险者，因此也可以通过类似的方法实现。</p>
+<p>最后一次作业中添加了秘境探险，在这一部分中使用接口和工厂模式，设置守卫接口来统一规划各个守卫类，设置宝藏接口和宝藏工厂，在成功打败守卫时，宝藏工厂会生产对应的宝藏给予冒险者使用。</p>
+<p><img src="/../image/2024%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E4%B8%8E%E6%9E%84%E9%80%A0%E5%85%88%E5%AF%BC%E8%AF%BE%E5%BF%83%E5%BE%97/image-20241101105701250.png" alt="image-20241101105701250"></p>
+<p>幸运的是，这半学期的作业迭代我没有体验过重构的痛苦。但是还是需要在每一步操作之前，都要思考一下这一步操作是否会影响之前的操作，这一步操作是否会影响之后的操作。例如当初始建立背包时，直接采用HashMap的方式，从而保证了以后可以快速查询对应的物品，以及方便后续为背包添加容量机制。再比如考虑到ce取决于atk与def可能会持续改变，于是初始即建立updateCE方法以保证战斗力的刷新。</p>
+<h2 id="2-使用JUnit的心得体会"><a href="#2-使用JUnit的心得体会" class="headerlink" title="2.使用JUnit的心得体会"></a>2.使用JUnit的心得体会</h2><p>实际上我的JUnit都是由中测数据直接自动生成了一个测试JUnit测试代码，<del>这何尝不算一种自动化测试呢</del>。但时显然，这种方法实际上对检查数据没有作用，只能省时省力地水很高的覆盖率。</p>
+<p><img src="/../image/2024%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E4%B8%8E%E6%9E%84%E9%80%A0%E5%85%88%E5%AF%BC%E8%AF%BE%E5%BF%83%E5%BE%97/image-20241101114352674.png" alt="image-20241101114352674"></p>
+<p>当然一开始写JUnit，我也发现这种单元化测试的方法实际上很需要技巧。如果上来追求覆盖率，那无疑直接从顶层类开始进行操作最方便，因为这里的方法涉及的其他方法是最多的。然而这样写的测试效果较差，因为一旦报错，从顶到下的所有部分都有可能有一定错误，仍然无法确定问题所在。</p>
+<p>其次，JUnit非常擅长解决Runtime Error相关错误，对于WA则需要断言进行解决，对于更为复杂的方法，这类断言可以一行一行的快速检查，然而对于这学期较为简单的OO作业效果不大还徒增麻烦。因此，我的JUnit更注重边界测试和压力测试，生成较大的数据以及较多类型的数据，看看程序能否成功运行完全。结果上来看，实际上只使用Junit发现过一个错误，效果并不是很好，甚至不如直接肉眼观察法，这里可能需要进一步的思考。</p>
+<h2 id="3-学习OOPre的心得体会"><a href="#3-学习OOPre的心得体会" class="headerlink" title="3.学习OOPre的心得体会"></a>3.学习OOPre的心得体会</h2><p>学了一年面向过程，还没来得及思考便进入了面向对象的学习。感觉面向对象是一件很神奇的事情，好似搭积木，每一步都是显而易见的并且极为简单的，但是按照要求一步一步写就可以完成一个复杂的任务。不确定这是冒险者游戏这个情景的特点还是面向对象本身的特点，也可能都是，总之，确实非常神奇。</p>
+<p>面向对象的重点似乎在于处理各个类的关系，核心要义即使将不同的对象利用简单的方法联系起来，需要其他对象时互相调用，不需要时则互不干扰。这种思维方式，只需要考究对象们本身的特点，而无需再考虑对象们操作的过程究竟如何，设立方法和类的过程如同写一篇说明文，每一段阐述明白对应的特点就能完成任务。</p>
+<p>但是实话说，目前仍然更喜欢面向过程这种记叙文的跌宕起伏，短小精悍。在有限的代码量中能体会到完成不可能任务的奇迹，以及各种预处理埋伏笔，最后通过各种发展砰的一下炸开达到高潮的精彩与快感。这也许是因为目前对于面向对象还是了解较少。(˶‾᷄ ⁻̫ ‾᷅˵)</p>
+<p>另外，必须强调，OOPre的审题极其重要，两次强测bug都仅是因为看错题（如将攻击力看成战斗力），或手误（如递归攻击没有减耐久度）。三个bug仅仅修改四行代码就全部解决，却卡掉了一大半数据点，实在是遗憾。<del>改的快觉得强测前就应该能写好，改的慢又觉得太菜开始焦虑</del>。也许我应该思考思考如何审这种长题了(-｡-;</p>
+<h2 id="4-对OOPre课程的简单建议"><a href="#4-对OOPre课程的简单建议" class="headerlink" title="4.对OOPre课程的简单建议"></a>4.对OOPre课程的简单建议</h2><p>1.希望作业描述稍微有趣一点（</p>
+<p>2.希望进一步增加测试相关内容的指导）</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2025/05/01/2024%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E4%B8%8E%E6%9E%84%E9%80%A0%E5%85%88%E5%AF%BC%E8%AF%BE%E5%BF%83%E5%BE%97/" data-id="cma5jv3850000jwtscq6jelc6" data-title="2024面向对象程序设计与构造先导课心得" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-Lab3实验报告" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2025/05/01/Lab3%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" class="article-date">
@@ -147,7 +585,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/Lab3%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5jd2lb0003j0tshe8wc4d5" data-title="Lab3实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2025/05/01/Lab3%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5jv38d0004jwtsfi422ihd" data-title="Lab3实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -226,7 +664,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5jd2la0002j0ts8chz4h1a" data-title="Lab2实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2025/05/01/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5jv38d0003jwts3tg02996" data-title="Lab2实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -297,7 +735,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/Lab1%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5jd2l80001j0ts3uope5z2" data-title="Lab1实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2025/05/01/Lab1%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5jv38c0002jwts41uzd8bc" data-title="Lab1实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -367,7 +805,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5jd2l40000j0ts2fligh3m" data-title="Lab0实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2025/05/01/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5jv38a0001jwtsczym6uay" data-title="Lab0实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -418,7 +856,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/hello-world/" data-id="cma5jd2lc0004j0ts76w0dzbf" data-title="Hello World" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2025/05/01/hello-world/" data-id="cma5jv38e0005jwtsfl8o5z02" data-title="Hello World" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -461,23 +899,23 @@
       <ul>
         
           <li>
+            <a href="/2025/05/01/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%BA%8C%E5%8D%95%E5%85%83/">北航2025面向对象第二单元</a>
+          </li>
+        
+          <li>
+            <a href="/2025/05/01/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%B8%80%E5%8D%95%E5%85%83/">北航2025面向对象第一单元</a>
+          </li>
+        
+          <li>
+            <a href="/2025/05/01/2024%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E4%B8%8E%E6%9E%84%E9%80%A0%E5%85%88%E5%AF%BC%E8%AF%BE%E5%BF%83%E5%BE%97/">2024面向对象程序设计与构造先导课心得</a>
+          </li>
+        
+          <li>
             <a href="/2025/05/01/Lab3%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/">Lab3实验报告</a>
           </li>
         
           <li>
             <a href="/2025/05/01/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/">Lab2实验报告</a>
-          </li>
-        
-          <li>
-            <a href="/2025/05/01/Lab1%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/">Lab1实验报告</a>
-          </li>
-        
-          <li>
-            <a href="/2025/05/01/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/">Lab0实验报告</a>
-          </li>
-        
-          <li>
-            <a href="/2025/05/01/hello-world/">Hello World</a>
           </li>
         
       </ul>
