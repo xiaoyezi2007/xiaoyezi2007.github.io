@@ -103,7 +103,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/Lab3%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5ig7k70000l4tshne3ecjn" data-title="Lab3实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2025/05/01/Lab3%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5ipkyp0002gwts09n66cqm" data-title="Lab3实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -141,19 +141,19 @@
 <p>MIPS汇编程序中lw和sw指令的地址也是虚拟地址。该地址发出后需要先被MMU映射成物理地址才能访存。</p>
 <h4 id="2-链表宏"><a href="#2-链表宏" class="headerlink" title="2.链表宏"></a>2.链表宏</h4><p>1）用宏实现链表有很多好处：许多地方都需要使用链表，如分页分段等，使用宏提前定义一个双向链表，不论何时需要使用，直接调用宏即可，十分方便，可重复使用。</p>
 <p>2）有关单向链表与循环链表，注释里存在这样的解释：</p>
-<p><img src="/2025/05/01/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406193307110.png" alt="image-20250406193307110"></p>
+<p><img src="/./Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406193307110.png" alt="image-20250406193307110"></p>
 <p>结合数据结构相关知识可知：对于插入操作，双向链表与循环链表均为O(1),单项链表为O(n)。对于删除操作，直接删除对应块即可，均为常数时间复杂度。</p>
 <h4 id="3-Page-list结构体"><a href="#3-Page-list结构体" class="headerlink" title="3.Page_list结构体"></a>3.Page_list结构体</h4><p>在pmap.h中发现如下定义</p>
-<p><img src="/2025/05/01/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406194300367.png" alt="image-20250406194300367"></p>
+<p><img src="/./Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406194300367.png" alt="image-20250406194300367"></p>
 <p>在queue.h中可以找到LIST_ENTRY(Page)的定义：</p>
-<p><img src="/2025/05/01/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406195243612.png" alt="image-20250406195243612"></p>
+<p><img src="/./Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406195243612.png" alt="image-20250406195243612"></p>
 <p>以及LIST_HEAD的定义：</p>
-<p><img src="/2025/05/01/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406195350137.png" alt="image-20250406195350137"></p>
+<p><img src="/./Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406195350137.png" alt="image-20250406195350137"></p>
 <p>定义为了一个指针。</p>
 <p>综上可以得到正确展开表达为：</p>
-<p><img src="/2025/05/01/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406195500106.png" alt="image-20250406195500106"></p>
+<p><img src="/./Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406195500106.png" alt="image-20250406195500106"></p>
 <h4 id="4-地址空间"><a href="#4-地址空间" class="headerlink" title="4.地址空间"></a>4.地址空间</h4><p>ASID用于区分不同的地址空间，因为同一虚拟地址在不同地址空间可以映射到不同的物理地址。这十分必要，因为若操作系统是多进程的，那么必须在操作系统里开辟不同的地址空间，每一个地址空间有一个映射关系。这就需要ASID进行区分。</p>
-<p><img src="/2025/05/01/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406201014090.png" alt="image-20250406201014090"></p>
+<p><img src="/./Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406201014090.png" alt="image-20250406201014090"></p>
 <p>根据文档，ASID共有8位，也即256个地址空间。</p>
 <h4 id="5-tlb-invalidate"><a href="#5-tlb-invalidate" class="headerlink" title="5.tlb_invalidate"></a>5.tlb_invalidate</h4><p>tlb_invalidate调用tlb_out</p>
 <p>tlb_invalidate可以清楚某虚拟地址对应的tlb表项，从而释放tlb空间。</p>
@@ -171,9 +171,9 @@
 
 <p>该指令可以快速在所有文件中找到有相关宏的行，找到#define并阅读对应代码即可。</p>
 <p>其二是物理地址与虚拟地址的概念和确定较为混乱。解决方法为首先要确定访存流程：</p>
-<p><img src="/2025/05/01/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406221038374.png" alt="image-20250406221038374"></p>
+<p><img src="/./Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406221038374.png" alt="image-20250406221038374"></p>
 <p>而后要确定当前所写对象是虚拟地址还是物理地址，然后使用宏定义中的转换函数进行转换。</p>
-<p><img src="/2025/05/01/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406221145532.png" alt="image-20250406221145532"></p>
+<p><img src="/./Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406221145532.png" alt="image-20250406221145532"></p>
 <h2 id="三、实验体会"><a href="#三、实验体会" class="headerlink" title="三、实验体会"></a>三、实验体会</h2><p>进入Lab2实验变得复杂了起来，这次跟着指导书多次尝试才完成实验。</p>
 <p>反思后认为，应当先多次阅读指导书，确定要做的事情以及解决问题的大致思路在开始写代码。</p>
 <p>另外我对于地址相关问题的掌握明显仍有欠缺，应当再次理解页表、虚拟地址、物理地址相关概念。</p>
@@ -182,7 +182,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5idyt20000xstsc8af1w2h" data-title="Lab2实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2025/05/01/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5ipkyr0004gwtscws8dioc" data-title="Lab2实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -253,7 +253,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/Lab1%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5hyigo00006ots4crghwbx" data-title="Lab1实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2025/05/01/Lab1%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5ipkyn0001gwts3j2jbohx" data-title="Lab1实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -315,7 +315,7 @@
 <p>4.可以用awk相关指令对文件某一行内容进行划分并输出，格式为awk -F: ‘{print $1}’ &lt;file&gt;这里的冒号意为以冒号为分界进行划分。$1为输出划分后的第一部分</p>
 <p>5.使用sed ‘s&#x2F;str1&#x2F;str2&#x2F;g’ &lt;file&gt;输出将str1替换为str2后的结果。需要注意的是，若字符串是变量，不能直接把str1改为$1，而应该通过字符串拼接的方式完成。Shell中字符串拼接直接将两个字符串并排放在一起即可。</p>
 <p>6.若要编译许多.c文件成一个可执行文件。则需要先使用gcc -c code.c -o code.o将文件转换成机器代码，此时生成的文件称作目标文件。然后，通过gcc code1.o code2.o -o out将多个文件链接成一个可执行文件。</p>
-<p>7.注意#include的文件默认在&#x2F;usr&#x2F;include下寻找。若想导入的库不在该目录下，则需要在预处理时使用参数-I <PATH>导入对应库，其中PATH指需要导入库的路径。</p>
+<p>7.注意#include的文件默认在&#x2F;usr&#x2F;include下寻找。若想导入的库不在该目录下，则需要在预处理时使用参数-I <PATH>导入对应库，其中PATH指需要导入库的路径。</PATH></p>
 <p>8.Makefile可以对子目录的Makefile进行调用，方法为：“$(MAKE) &lt;arg&gt; -C &lt;PATH&gt;”，其中arg为用make sth.调用Makefile时sth.的内容，若缺项则默认为以make的方式调用，也即访问第一个target。PATH处填想调用哪一个子目录中的Makefile</p>
 <h2 id="三、实验体会"><a href="#三、实验体会" class="headerlink" title="三、实验体会"></a>三、实验体会</h2><p>初步了解了Unix系统的使用方法，需要的指令较多难以完全记住，要通过不断实践来强化记忆。</p>
 <p>操作方面需要注意文件不能一边读取一遍写入，最终会得到空文件。应当先建立一个临时的中间文件保存，最后再删去。</p>
@@ -323,7 +323,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5hrxti0000bsts0i9z99fq" data-title="Lab0实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2025/05/01/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5ipkyi0000gwts6u5i38bq" data-title="Lab0实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -374,7 +374,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/hello-world/" data-id="cma5ge88o00004ots131l96ae" data-title="Hello World" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2025/05/01/hello-world/" data-id="cma5ipkyq0003gwtsg0idd6sk" data-title="Hello World" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
