@@ -99,11 +99,55 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        
+        <h1 id="Lab3-实验报告"><a href="#Lab3-实验报告" class="headerlink" title="Lab3 实验报告"></a>Lab3 实验报告</h1><p>本次实验主要实现进程的创建与运行，以及实现进程调度。</p>
+<h3 id="思考题"><a href="#思考题" class="headerlink" title="思考题"></a>思考题</h3><h4 id="1-对物理地址和虚拟地址的理解"><a href="#1-对物理地址和虚拟地址的理解" class="headerlink" title="1.对物理地址和虚拟地址的理解"></a>1.对物理地址和虚拟地址的理解</h4><p>由自映射机制，UVPT处向上的部分是进程页表，而UVPT本身的这一项指向了自己。因此这一条语句就是将UVPT所在的这个页表项指向自己。</p>
+<h4 id="2-data的作用"><a href="#2-data的作用" class="headerlink" title="2.data的作用"></a>2.data的作用</h4><p>data出现在函数load_icode_mapper中：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Env</span> *<span class="title">env</span> =</span> (<span class="keyword">struct</span> Env *)data;</span><br></pre></td></tr></table></figure>
+
+<p>data可以接受一个任意类型的指针，并将其转换成进程类型的指针。从而找到进程的位置并载入镜像。</p>
+<p>没有data不可以因为env将无从寻找。</p>
+<h4 id="3-elf-load-seg的不同情况"><a href="#3-elf-load-seg的不同情况" class="headerlink" title="3.elf_load_seg的不同情况"></a>3.elf_load_seg的不同情况</h4><p>该函数代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">elf_load_seg</span><span class="params">(Elf32_Phdr *ph, <span class="type">const</span> <span class="type">void</span> *bin, <span class="type">elf_mapper_t</span> map_page, <span class="type">void</span> *data)</span> &#123;</span><br><span class="line">	u_long va = ph-&gt;p_vaddr;</span><br><span class="line">	<span class="type">size_t</span> bin_size = ph-&gt;p_filesz;</span><br><span class="line">	<span class="type">size_t</span> sgsize = ph-&gt;p_memsz;</span><br><span class="line">	u_int perm = PTE_V;</span><br><span class="line">	<span class="keyword">if</span> (ph-&gt;p_flags &amp; PF_W) &#123;</span><br><span class="line">		perm |= PTE_D;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="type">int</span> r;</span><br><span class="line">	<span class="type">size_t</span> i;</span><br><span class="line">	u_long offset = va - ROUNDDOWN(va, PAGE_SIZE);</span><br><span class="line">	<span class="keyword">if</span> (offset != <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="keyword">if</span> ((r = map_page(data, va, offset, perm, bin,</span><br><span class="line">				  MIN(bin_size, PAGE_SIZE - offset))) != <span class="number">0</span>) &#123;</span><br><span class="line">			<span class="keyword">return</span> r;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Step 1: load all content of bin into memory. */</span></span><br><span class="line">	<span class="keyword">for</span> (i = offset ? MIN(bin_size, PAGE_SIZE - offset) : <span class="number">0</span>; i &lt; bin_size; i += PAGE_SIZE) &#123;</span><br><span class="line">		<span class="keyword">if</span> ((r = map_page(data, va + i, <span class="number">0</span>, perm, bin + i, MIN(bin_size - i, PAGE_SIZE))) !=</span><br><span class="line">		    <span class="number">0</span>) &#123;</span><br><span class="line">			<span class="keyword">return</span> r;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Step 2: alloc pages to reach `sgsize` when `bin_size` &lt; `sgsize`. */</span></span><br><span class="line">	<span class="keyword">while</span> (i &lt; sgsize) &#123;</span><br><span class="line">		<span class="keyword">if</span> ((r = map_page(data, va + i, <span class="number">0</span>, perm, <span class="literal">NULL</span>, MIN(sgsize - i, PAGE_SIZE))) != <span class="number">0</span>) &#123;</span><br><span class="line">			<span class="keyword">return</span> r;</span><br><span class="line">		&#125;</span><br><span class="line">		i += PAGE_SIZE;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>首先要检查页面是否有效，而后将页面地址对齐。</p>
+<p>而后将所有bin中的内容load进内存空间，需要比较页面地址与bin空间大小的关系。</p>
+<p>最后还要比较内存空间与bin空间的大小并申请合适的页空间。</p>
+<h4 id="4-EPC的含义"><a href="#4-EPC的含义" class="headerlink" title="4.EPC的含义"></a>4.EPC的含义</h4><p>这里的env_tf.cp0_epc字段指示了进程恢复运行时PC应恢复到的位置。我们要运行的 进程的代码段预先被载入到了内存中，且程序入口为e_entry，当我们运行进程时，CPU将自动从PC所指的位置开始执行二进制码。</p>
+<p>因此，env_tf.cp0_epc中存储了要跳转的指令地址的起始地址，该地址是虚拟地址。</p>
+<h4 id="5-异常处理函数的实现位置"><a href="#5-异常处理函数的实现位置" class="headerlink" title="5.异常处理函数的实现位置"></a>5.异常处理函数的实现位置</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;asm/asm.h&gt;</span><br><span class="line">#include &lt;stackframe.h&gt;</span><br><span class="line"></span><br><span class="line">.macro BUILD_HANDLER exception handler</span><br><span class="line">NESTED(handle_\exception, TF_SIZE + 8, zero)</span><br><span class="line">        move    a0, sp</span><br><span class="line">        addiu   sp, sp, -8</span><br><span class="line">        jal     \handler</span><br><span class="line">        addiu   sp, sp, 8</span><br><span class="line">        j       ret_from_exception</span><br><span class="line">END(handle_\exception)</span><br><span class="line">.endm</span><br><span class="line"></span><br><span class="line">.text</span><br><span class="line"></span><br><span class="line">FEXPORT(ret_from_exception)</span><br><span class="line">        RESTORE_ALL</span><br><span class="line">        eret</span><br><span class="line"></span><br><span class="line">NESTED(handle_int, TF_SIZE, zero)</span><br><span class="line">        mfc0    t0, CP0_CAUSE</span><br><span class="line">        mfc0    t2, CP0_STATUS</span><br><span class="line">        and     t0, t2</span><br><span class="line">        andi    t1, t0, STATUS_IM7</span><br><span class="line">        bnez    t1, timer_irq</span><br><span class="line">timer_irq:</span><br><span class="line">        li      a0, 0</span><br><span class="line">        j       schedule</span><br><span class="line">END(handle_int)</span><br></pre></td></tr></table></figure>
+
+<p>使用grep指令查找发现异常初始化相关定义位于kern&#x2F;genex.S，内容是朴素的将异常码填充到相应的地址位置。</p>
+<h4 id="6-时钟的设置"><a href="#6-时钟的设置" class="headerlink" title="6.时钟的设置"></a>6.时钟的设置</h4><p>时钟中断与时间片调度机制紧密相关。当一个进程所持有的时间片走到尽头时，则触发时钟中断以切换进程。初始化MOS始终后Count会随时间流逝不断增加，当CP0中Count寄存器与Compare寄存器的值相等时触发时钟中断。随后交由genex.S处理中断，初始化中断问题后进行调度以结束时钟中断。</p>
+<h4 id="7-进程的调度"><a href="#7-进程的调度" class="headerlink" title="7.进程的调度"></a>7.进程的调度</h4><p>触发时钟调度，而后调用handle_int处理中断，而后跳转到schedule进行进程调度。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">schedule</span><span class="params">(<span class="type">int</span> yield)</span> &#123;</span><br><span class="line">	<span class="type">static</span> <span class="type">int</span> count = <span class="number">0</span>; <span class="comment">// remaining time slices of current env</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">Env</span> *<span class="title">e</span> =</span> curenv;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (yield || count == <span class="number">0</span> || e == <span class="literal">NULL</span> || e-&gt;env_status != ENV_RUNNABLE) &#123;</span><br><span class="line">		<span class="keyword">if</span> (e != <span class="literal">NULL</span> &amp;&amp; e-&gt;env_status == ENV_RUNNABLE) &#123;</span><br><span class="line">			TAILQ_REMOVE(&amp;env_sched_list, e, env_sched_link);</span><br><span class="line">			TAILQ_INSERT_TAIL(&amp;env_sched_list, e, env_sched_link);</span><br><span class="line">		&#125;</span><br><span class="line">		e = TAILQ_FIRST(&amp;env_sched_list);</span><br><span class="line">		<span class="keyword">if</span> (e == <span class="literal">NULL</span>) &#123;</span><br><span class="line">			panic(<span class="string">&quot;no runnable env when schedule!\n&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		count = e-&gt;env_pri;</span><br><span class="line">	&#125;</span><br><span class="line">	count--;</span><br><span class="line">	env_run(e);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>schedule函数中，要考察进程是否需要强制切换，是否进程的运行次数为0，是否变为了非执行状态。若有一个条件满足，那么需要切换进程，即从调度队列里面选一个进程执行。反之直接使当前进程继续执行即可。</p>
+<h3 id="难点分析"><a href="#难点分析" class="headerlink" title="难点分析"></a>难点分析</h3><p>本次实验只需要实现进程构建以及异常与中断的处理。</p>
+<h4 id="线程构建方面"><a href="#线程构建方面" class="headerlink" title="线程构建方面"></a>线程构建方面</h4><p>每一个进程都由一个进程控制块PCB控制，实验中PCB由一个Env结构体实现。结构体中的变量最为关键，分别是：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Env</span> &#123;</span></span><br><span class="line"> 	<span class="class"><span class="keyword">struct</span> <span class="title">Trapframe</span> <span class="title">env_tf</span>;</span></span><br><span class="line"> 	LIST_ENTRY(Env) env_link; </span><br><span class="line"> 	u_int env_id;</span><br><span class="line"> 	u_int env_parent_id;</span><br><span class="line"> 	u_int env_status;</span><br><span class="line"> 	Pde *env_pgdir;</span><br><span class="line"> 	TAILQ_ENTRY(Env) env_sched_link; </span><br><span class="line"> 	u_int env_pri;</span><br><span class="line"> &#125;;</span><br></pre></td></tr></table></figure>
+
+<p>其中env_tf用于保存上下文信息，通过一个结构体保存。当进程陷入内核或者发生调度时需要将环境信息储存在这里</p>
+<p>env_link用于构建进程链表</p>
+<p>env_id是该进程的id，每个进程的id会保证不相同</p>
+<p>env_parent_id是该进程的父进程的id。进程是可以通过fork被其他进程创建</p>
+<p>env_status表示进程的当前状态，分别是空闲状态（ENV_FREE）表示该控制块没有被任何进程使用；阻塞状态（ENV_NOT_RUNNABLE）表示进程被阻塞需要一定的操作冲洗变为就绪状态；执行或就绪状态（ENV_RUNNABLE）进程正在执行或等待被调度，调度时只需要从这里选择一个进程执行即可。</p>
+<p><img src="/../image/Lab3%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250422110633410.png" alt="image-20250422110633410"></p>
+<p>env_pgdir表示该进程页目录的内核虚拟地址</p>
+<p>env_sched_link用于构建调度队列的链表（env_sched_list）</p>
+<p>env_pri表示进程优先级</p>
+<p>因此进程处理的核心就是构建一个PCB并且将一个进程的相关信息全部载入，并在阻塞队列和就绪队列之间来回调度即可。</p>
+<h4 id="中断与异常部分"><a href="#中断与异常部分" class="headerlink" title="中断与异常部分"></a>中断与异常部分</h4><p>中断可以视作一种特殊的异常。</p>
+<p>异常发生后先由genex.S初始化，即将异常原因存入相关地址中，而后entry.S会进行异常分发，识别异常码并跳转到对应的异常处理程序处进行异常处理。</p>
+<p>另外对于特别的时钟中断，也即时间片到时间时发生的中断，需要对进程进行调度，这里的逻辑非常简单：</p>
+<p>判断是否需要强制调度？进程运行结束了吗？进程是否不再就绪？</p>
+<p>如果满足这三个条件其一，就要切换进程，也就是从就绪队列里面根据调度算法选择一个进程执行。反之，不妨继续运行这个程序即可。</p>
+<h3 id="实验体会"><a href="#实验体会" class="headerlink" title="实验体会"></a>实验体会</h3><p>相比上一次实验难度稍微下降了一点。这次主要需要理解的就是进程本身的概念以及进程调度的相关方法。我的实验方法为反复阅读基本的结构体定义，以及理论课上所讲的相关进程调度方法，通过先确定大体实现方法在写代码的方式理解代码，并完成实验。</p>
+<p>下一步是学习有关的进程调度方式并实践。</p>
+
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/Lab3%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5ipkyp0002gwts09n66cqm" data-title="Lab3实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2025/05/01/Lab3%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5jd2lb0003j0tshe8wc4d5" data-title="Lab3实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -141,19 +185,19 @@
 <p>MIPS汇编程序中lw和sw指令的地址也是虚拟地址。该地址发出后需要先被MMU映射成物理地址才能访存。</p>
 <h4 id="2-链表宏"><a href="#2-链表宏" class="headerlink" title="2.链表宏"></a>2.链表宏</h4><p>1）用宏实现链表有很多好处：许多地方都需要使用链表，如分页分段等，使用宏提前定义一个双向链表，不论何时需要使用，直接调用宏即可，十分方便，可重复使用。</p>
 <p>2）有关单向链表与循环链表，注释里存在这样的解释：</p>
-<p><img src="/./Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406193307110.png" alt="image-20250406193307110"></p>
+<p><img src="/../image/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406193307110.png" alt="image-20250406193307110"></p>
 <p>结合数据结构相关知识可知：对于插入操作，双向链表与循环链表均为O(1),单项链表为O(n)。对于删除操作，直接删除对应块即可，均为常数时间复杂度。</p>
 <h4 id="3-Page-list结构体"><a href="#3-Page-list结构体" class="headerlink" title="3.Page_list结构体"></a>3.Page_list结构体</h4><p>在pmap.h中发现如下定义</p>
-<p><img src="/./Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406194300367.png" alt="image-20250406194300367"></p>
+<p><img src="/../image/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406194300367.png" alt="image-20250406194300367"></p>
 <p>在queue.h中可以找到LIST_ENTRY(Page)的定义：</p>
-<p><img src="/./Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406195243612.png" alt="image-20250406195243612"></p>
+<p><img src="/../image/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406195243612.png" alt="image-20250406195243612"></p>
 <p>以及LIST_HEAD的定义：</p>
-<p><img src="/./Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406195350137.png" alt="image-20250406195350137"></p>
+<p><img src="/../image/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406195350137.png" alt="image-20250406195350137"></p>
 <p>定义为了一个指针。</p>
 <p>综上可以得到正确展开表达为：</p>
-<p><img src="/./Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406195500106.png" alt="image-20250406195500106"></p>
+<p><img src="/../image/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406195500106.png" alt="image-20250406195500106"></p>
 <h4 id="4-地址空间"><a href="#4-地址空间" class="headerlink" title="4.地址空间"></a>4.地址空间</h4><p>ASID用于区分不同的地址空间，因为同一虚拟地址在不同地址空间可以映射到不同的物理地址。这十分必要，因为若操作系统是多进程的，那么必须在操作系统里开辟不同的地址空间，每一个地址空间有一个映射关系。这就需要ASID进行区分。</p>
-<p><img src="/./Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406201014090.png" alt="image-20250406201014090"></p>
+<p><img src="/../image/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406201014090.png" alt="image-20250406201014090"></p>
 <p>根据文档，ASID共有8位，也即256个地址空间。</p>
 <h4 id="5-tlb-invalidate"><a href="#5-tlb-invalidate" class="headerlink" title="5.tlb_invalidate"></a>5.tlb_invalidate</h4><p>tlb_invalidate调用tlb_out</p>
 <p>tlb_invalidate可以清楚某虚拟地址对应的tlb表项，从而释放tlb空间。</p>
@@ -171,9 +215,9 @@
 
 <p>该指令可以快速在所有文件中找到有相关宏的行，找到#define并阅读对应代码即可。</p>
 <p>其二是物理地址与虚拟地址的概念和确定较为混乱。解决方法为首先要确定访存流程：</p>
-<p><img src="/./Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406221038374.png" alt="image-20250406221038374"></p>
+<p><img src="/../image/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406221038374.png" alt="image-20250406221038374"></p>
 <p>而后要确定当前所写对象是虚拟地址还是物理地址，然后使用宏定义中的转换函数进行转换。</p>
-<p><img src="/./Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406221145532.png" alt="image-20250406221145532"></p>
+<p><img src="/../image/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250406221145532.png" alt="image-20250406221145532"></p>
 <h2 id="三、实验体会"><a href="#三、实验体会" class="headerlink" title="三、实验体会"></a>三、实验体会</h2><p>进入Lab2实验变得复杂了起来，这次跟着指导书多次尝试才完成实验。</p>
 <p>反思后认为，应当先多次阅读指导书，确定要做的事情以及解决问题的大致思路在开始写代码。</p>
 <p>另外我对于地址相关问题的掌握明显仍有欠缺，应当再次理解页表、虚拟地址、物理地址相关概念。</p>
@@ -182,7 +226,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5ipkyr0004gwtscws8dioc" data-title="Lab2实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2025/05/01/Lab2%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5jd2la0002j0ts8chz4h1a" data-title="Lab2实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -217,29 +261,29 @@
     <div class="e-content article-entry" itemprop="articleBody">
       
         <h1 id="Lab1-实验报告"><a href="#Lab1-实验报告" class="headerlink" title="Lab1 实验报告"></a>Lab1 实验报告</h1><h2 id="一、思考题"><a href="#一、思考题" class="headerlink" title="一、思考题"></a>一、思考题</h2><h4 id="objdump参数和其它体系结构编译链接过程"><a href="#objdump参数和其它体系结构编译链接过程" class="headerlink" title="objdump参数和其它体系结构编译链接过程"></a>objdump参数和其它体系结构编译链接过程</h4><p>编译输出Hello world！的文件后反汇编输出如下（节选）</p>
-<p><img src="/.%5Cimage%5Cimage-20250323191018943.png" alt="image-20250323191018943"></p>
+<p><img src="/..%5Cimage%5CLab1%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A%5Cimage-20250323191018943.png" alt="image-20250323191018943"></p>
 <p>链接成可执行文件后反汇编结果如下：</p>
-<p><img src="/.%5Cimage%5Cimage-20250323191313663.png" alt="image-20250323191313663"></p>
+<p><img src="/..%5Cimage%5CLab1%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A%5Cimage-20250323191313663.png" alt="image-20250323191313663"></p>
 <p>输出内容长了许多，并且恰如指导书指出的，在printf处填上了调用的地址。</p>
 <p>使用类似的操作，用MIPS交叉编译工具链分析代码，获得了如下结果：</p>
-<p><img src="/.%5Cimage%5Cimage-20250323191622241.png" alt="image-20250323191622241"></p>
+<p><img src="/..%5Cimage%5CLab1%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A%5Cimage-20250323191622241.png" alt="image-20250323191622241"></p>
 <p>链接后：</p>
-<p><img src="/.%5Cimage%5Cimage-20250323191736788.png" alt="image-20250323191736788"></p>
+<p><img src="/..%5Cimage%5CLab1%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A%5Cimage-20250323191736788.png" alt="image-20250323191736788"></p>
 <p>主要区别体现在了对gp的赋值，与原生gcc的情况类似。</p>
 <p>此外通过man指令得知，objdump的参数中，-D表示反汇编所有部分的内容，-S表示输出与反汇编对应的源代码。</p>
-<p><img src="/.%5Cimage%5Cimage-20250323192117739.png" alt="image-20250323192117739"></p>
-<h4 id="readelf的程序问题"><a href="#readelf的程序问题" class="headerlink" title="readelf的程序问题"></a>readelf的程序问题</h4><p><img src="/.%5Cimage%5Cimage-20250323192933951.png" alt="image-20250323192933951"></p>
+<p><img src="/..%5Cimage%5CLab1%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A%5Cimage-20250323192117739.png" alt="image-20250323192117739"></p>
+<h4 id="readelf的程序问题"><a href="#readelf的程序问题" class="headerlink" title="readelf的程序问题"></a>readelf的程序问题</h4><p><img src="/..%5Cimage%5CLab1%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A%5Cimage-20250323192933951.png" alt="image-20250323192933951"></p>
 <p>如图，使用编写的readelf解析readelf后不会有任何输出，但是调用系统的readelf解析我们写的readelf，则输出节选如下：</p>
-<p><img src="/.%5Cimage%5Cimage-20250323193033517.png" alt="image-20250323193033517"></p>
+<p><img src="/..%5Cimage%5CLab1%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A%5Cimage-20250323193033517.png" alt="image-20250323193033517"></p>
 <p>进行一些观察：</p>
-<p><img src="/.%5Cimage%5Cimage-20250323193207723.png" alt="image-20250323193207723"></p>
-<p><img src="/.%5Cimage%5Cimage-20250323193422004.png" alt="image-20250323193422004"></p>
+<p><img src="/..%5Cimage%5CLab1%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A%5Cimage-20250323193207723.png" alt="image-20250323193207723"></p>
+<p><img src="/..%5Cimage%5CLab1%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A%5Cimage-20250323193422004.png" alt="image-20250323193422004"></p>
 <p>hello与readelf的编译方式似乎有些不同。hello在编译时要求生成了32位架构的文件。所以不能识别readelf的问题在于架构不同。</p>
-<h4 id="内核入口地址的问题"><a href="#内核入口地址的问题" class="headerlink" title="内核入口地址的问题"></a>内核入口地址的问题</h4><p><img src="/.%5Cimage%5Cimage-20250323194745365.png" alt="image-20250323194745365"></p>
+<h4 id="内核入口地址的问题"><a href="#内核入口地址的问题" class="headerlink" title="内核入口地址的问题"></a>内核入口地址的问题</h4><p><img src="/..%5Cimage%5CLab1%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A%5Cimage-20250323194745365.png" alt="image-20250323194745365"></p>
 <p>回顾启动的基本步骤，再第一步中启动程序由写在ROM中的BootLoader执行，该程序会保证在第一阶段结束时正确跳转到内核入口并开始第二阶段。</p>
 <h2 id="难点分析"><a href="#难点分析" class="headerlink" title="难点分析"></a>难点分析</h2><p>本次作业信息量巨大，从无到有解除了许多概念，难以理解，下面进行一些整理。</p>
 <h4 id="ELF文件"><a href="#ELF文件" class="headerlink" title="ELF文件"></a>ELF文件</h4><p>也就是目标文件或者可执行文件，指导书给出了一个清晰的文件结构图：</p>
-<p><img src="/./image/image-20250323195453285.png" alt="image-20250323195453285"></p>
+<p><img src="/..%5Cimage%5CLab1%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A%5Cimage-20250323195453285.png" alt="image-20250323195453285"></p>
 <p>该图明确节和段是两种不同描述ELF的方法，该方法的参数，如大小，地址等均提前确定好。空间被平均分为了若干节或段。第一节节头位域binary+e_shoff，程序头起点位于binary+e_phoff，若要访问指定节，地址依次增加对应的大小即可。</p>
 <h4 id="内存布局"><a href="#内存布局" class="headerlink" title="内存布局"></a>内存布局</h4><p>不同的指令体系有不同的空间布局，不同平台的运行接口也不一样。因此，在编译程序后链接时，需要将操作指令已经变量储存到应该存储的位置。通过有指令设置.text、.bss、.data的地址（他们都是ELF内的节），来确定存储的位置，从而正确的使用数据。</p>
 <p>另外，在链接器链接时还需要_start函数。该函数将栈指针设置到栈帧空间起点的位置上，并跳转到mips_init的位置。</p>
@@ -253,7 +297,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/Lab1%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5ipkyn0001gwts3j2jbohx" data-title="Lab1实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2025/05/01/Lab1%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5jd2l80001j0ts3uope5z2" data-title="Lab1实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -287,27 +331,27 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h1 id="Lab0-实验报告"><a href="#Lab0-实验报告" class="headerlink" title="Lab0 实验报告"></a>Lab0 实验报告</h1><h2 id="一、思考题"><a href="#一、思考题" class="headerlink" title="一、思考题"></a>一、思考题</h2><h3 id="Thinking-0-1-Git-的使用1"><a href="#Thinking-0-1-Git-的使用1" class="headerlink" title="Thinking 0.1 Git 的使用1"></a>Thinking 0.1 Git 的使用1</h3><p><img src="/./image/image-20250228111537702.png" alt="image-20250228111537702"></p>
-<p><img src="/./image/image-20250228111600112.png" alt="image-20250228111600112"></p>
-<p><img src="/./image/image-20250228111619791.png" alt="image-20250228111619791"></p>
+        <h1 id="Lab0-实验报告"><a href="#Lab0-实验报告" class="headerlink" title="Lab0 实验报告"></a>Lab0 实验报告</h1><h2 id="一、思考题"><a href="#一、思考题" class="headerlink" title="一、思考题"></a>一、思考题</h2><h3 id="Thinking-0-1-Git-的使用1"><a href="#Thinking-0-1-Git-的使用1" class="headerlink" title="Thinking 0.1 Git 的使用1"></a>Thinking 0.1 Git 的使用1</h3><p><img src="/../image/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250228111537702.png" alt="image-20250228111537702"></p>
+<p><img src="/../image/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250228111600112.png" alt="image-20250228111600112"></p>
+<p><img src="/../image/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250228111619791.png" alt="image-20250228111619791"></p>
 <p>通过实践得到了三个status的输出内容。不使用add指令时README.txt是为跟踪的文件，使用add指令后变为要提交的变更，而提交后若对文件修改，则变为“尚未暂存以备提交的变更”，此时需要再次add并commit以提交。内容不同的原因在于前者处于Untracked状态而后者处于Modified状态。</p>
-<h3 id="Thinking-0-2-箭头与命令"><a href="#Thinking-0-2-箭头与命令" class="headerlink" title="Thinking 0.2 箭头与命令"></a>Thinking 0.2 箭头与命令</h3><p><img src="/.%5Cimage%5Cimage-20250228112228961.png" alt="image-20250228112228961"></p>
+<h3 id="Thinking-0-2-箭头与命令"><a href="#Thinking-0-2-箭头与命令" class="headerlink" title="Thinking 0.2 箭头与命令"></a>Thinking 0.2 箭头与命令</h3><p><img src="/../image/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250228112228961.png" alt="image-20250228112228961"></p>
 <p>其中Add the file对应git add；stage the file也对应git add；commit对应git commit -m “note”</p>
 <h3 id="Thinking-0-3-Git的一些场景"><a href="#Thinking-0-3-Git的一些场景" class="headerlink" title="Thinking 0.3 Git的一些场景"></a>Thinking 0.3 Git的一些场景</h3><p>代码文件print.c被错误删除时，应当使用git checkout – print.c</p>
 <p>代码文件print.c被错误删除后，执行了git rm print.c命令，应当使用git reset HEAD print.c</p>
 <p>无关文件hello.txt已经被添加到暂存区时，若要在不删除此文件的前提下将其移出暂存区，应当使用git rm –cached hello.txt</p>
 <h3 id="Thinking-0-4-Git的使用2"><a href="#Thinking-0-4-Git的使用2" class="headerlink" title="Thinking 0.4 Git的使用2"></a>Thinking 0.4 Git的使用2</h3><p>进行三次提交后获得log如下：</p>
-<p><img src="/.%5Cimage%5Cimage-20250302003221123.png" alt="image-20250302003221123"></p>
+<p><img src="/../image/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250302003221123.png" alt="image-20250302003221123"></p>
 <p>进行版本回退后log如下：</p>
-<p><img src="/.%5Cimage%5Cimage-20250302003346057.png" alt="image-20250302003346057"></p>
+<p><img src="/../image/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250302003346057.png" alt="image-20250302003346057"></p>
 <p>利用哈希值指定回退到第一次提交后，log如下：</p>
-<p><img src="/.%5Cimage%5Cimage-20250302003417556.png" alt="image-20250302003417556"></p>
+<p><img src="/../image/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250302003417556.png" alt="image-20250302003417556"></p>
 <p>使用第3次提交的哈希值回复回退操作，log如下：</p>
-<p><img src="/.%5Cimage%5Cimage-20250302003500094.png" alt="image-20250302003500094"></p>
-<h3 id="Thinking-0-5-echo的使用"><a href="#Thinking-0-5-echo的使用" class="headerlink" title="Thinking 0.5 echo的使用"></a>Thinking 0.5 echo的使用</h3><p><img src="/.%5Cimage%5Cimage-20250302003725640.png" alt="image-20250302003725640"></p>
+<p><img src="/../image/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250302003500094.png" alt="image-20250302003500094"></p>
+<h3 id="Thinking-0-5-echo的使用"><a href="#Thinking-0-5-echo的使用" class="headerlink" title="Thinking 0.5 echo的使用"></a>Thinking 0.5 echo的使用</h3><p><img src="/../image/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250302003725640.png" alt="image-20250302003725640"></p>
 <p>指令执行结果如下。&gt;可以将输出内容输入到文件之中，若不存在文件则新建，若已有文件则覆盖。&gt;&gt;则是在文件末尾添加输出内容。</p>
 <h3 id="Thinking-0-6-文件的操作"><a href="#Thinking-0-6-文件的操作" class="headerlink" title="Thinking 0.6 文件的操作"></a>Thinking 0.6 文件的操作</h3><p>command和result内容如下：</p>
-<p><img src="/.%5Cimage%5Cimage-20250302005052582.png" alt="image-20250302005052582"></p>
+<p><img src="/../image/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/image-20250302005052582.png" alt="image-20250302005052582"></p>
 <p> echo echo Shell Start 与 echo ‘echo Shell Start’ 效果没有区别；但是 echo echo $c&gt;file1 与echo echo $c&gt;file1 效果有区别。因为重定向和echo的优先级冲突了。</p>
 <h2 id="二、难点分析"><a href="#二、难点分析" class="headerlink" title="二、难点分析"></a>二、难点分析</h2><p>1.sed -n ‘8p’ &lt;file&gt; 可以用来输出文件中第8行的内容。</p>
 <p>2.删除文件使用rm指令，重命名可以使用mv指令实现。</p>
@@ -315,7 +359,7 @@
 <p>4.可以用awk相关指令对文件某一行内容进行划分并输出，格式为awk -F: ‘{print $1}’ &lt;file&gt;这里的冒号意为以冒号为分界进行划分。$1为输出划分后的第一部分</p>
 <p>5.使用sed ‘s&#x2F;str1&#x2F;str2&#x2F;g’ &lt;file&gt;输出将str1替换为str2后的结果。需要注意的是，若字符串是变量，不能直接把str1改为$1，而应该通过字符串拼接的方式完成。Shell中字符串拼接直接将两个字符串并排放在一起即可。</p>
 <p>6.若要编译许多.c文件成一个可执行文件。则需要先使用gcc -c code.c -o code.o将文件转换成机器代码，此时生成的文件称作目标文件。然后，通过gcc code1.o code2.o -o out将多个文件链接成一个可执行文件。</p>
-<p>7.注意#include的文件默认在&#x2F;usr&#x2F;include下寻找。若想导入的库不在该目录下，则需要在预处理时使用参数-I <PATH>导入对应库，其中PATH指需要导入库的路径。</PATH></p>
+<p>7.注意#include的文件默认在&#x2F;usr&#x2F;include下寻找。若想导入的库不在该目录下，则需要在预处理时使用参数-I <PATH>导入对应库，其中PATH指需要导入库的路径。</p>
 <p>8.Makefile可以对子目录的Makefile进行调用，方法为：“$(MAKE) &lt;arg&gt; -C &lt;PATH&gt;”，其中arg为用make sth.调用Makefile时sth.的内容，若缺项则默认为以make的方式调用，也即访问第一个target。PATH处填想调用哪一个子目录中的Makefile</p>
 <h2 id="三、实验体会"><a href="#三、实验体会" class="headerlink" title="三、实验体会"></a>三、实验体会</h2><p>初步了解了Unix系统的使用方法，需要的指令较多难以完全记住，要通过不断实践来强化记忆。</p>
 <p>操作方面需要注意文件不能一边读取一遍写入，最终会得到空文件。应当先建立一个临时的中间文件保存，最后再删去。</p>
@@ -323,7 +367,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5ipkyi0000gwts6u5i38bq" data-title="Lab0实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2025/05/01/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5jd2l40000j0ts2fligh3m" data-title="Lab0实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -374,7 +418,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/hello-world/" data-id="cma5ipkyq0003gwtsg0idd6sk" data-title="Hello World" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2025/05/01/hello-world/" data-id="cma5jd2lc0004j0ts76w0dzbf" data-title="Hello World" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
