@@ -77,665 +77,65 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-Lab2 实验报告" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+    <article id="post-Lab0实验报告" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2025/05/01/Lab2%20%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" class="article-date">
-  <time class="dt-published" datetime="2025-05-01T14:39:21.581Z" itemprop="datePublished">2025-05-01</time>
+    <a href="/2025/05/01/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" class="article-date">
+  <time class="dt-published" datetime="2025-05-01T14:44:08.000Z" itemprop="datePublished">2025-05-01</time>
 </a>
     
   </div>
   <div class="article-inner">
     
     
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h1 id="Lab2-实验报告"><a href="#Lab2-实验报告" class="headerlink" title="Lab2 实验报告"></a>Lab2 实验报告</h1><h2 id="一、思考题"><a href="#一、思考题" class="headerlink" title="一、思考题"></a>一、思考题</h2><h4 id="1-程序代码中的地址"><a href="#1-程序代码中的地址" class="headerlink" title="1.程序代码中的地址"></a>1.程序代码中的地址</h4><p>在编写的C程序中，指针变量中储存的地址应当是虚拟地址。编译器需要对该地址解引用后才能访存。</p>
-<p>MIPS汇编程序中lw和sw指令的地址也是虚拟地址。该地址发出后需要先被MMU映射成物理地址才能访存。</p>
-<h4 id="2-链表宏"><a href="#2-链表宏" class="headerlink" title="2.链表宏"></a>2.链表宏</h4><p>1）用宏实现链表有很多好处：许多地方都需要使用链表，如分页分段等，使用宏提前定义一个双向链表，不论何时需要使用，直接调用宏即可，十分方便，可重复使用。</p>
-<p>2）有关单向链表与循环链表，注释里存在这样的解释：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250406193307110.png" alt="image-20250406193307110"></p>
-<p>结合数据结构相关知识可知：对于插入操作，双向链表与循环链表均为O(1),单项链表为O(n)。对于删除操作，直接删除对应块即可，均为常数时间复杂度。</p>
-<h4 id="3-Page-list结构体"><a href="#3-Page-list结构体" class="headerlink" title="3.Page_list结构体"></a>3.Page_list结构体</h4><p>在pmap.h中发现如下定义</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250406194300367.png" alt="image-20250406194300367"></p>
-<p>在queue.h中可以找到LIST_ENTRY(Page)的定义：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250406195243612.png" alt="image-20250406195243612"></p>
-<p>以及LIST_HEAD的定义：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250406195350137.png" alt="image-20250406195350137"></p>
-<p>定义为了一个指针。</p>
-<p>综上可以得到正确展开表达为：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250406195500106.png" alt="image-20250406195500106"></p>
-<h4 id="4-地址空间"><a href="#4-地址空间" class="headerlink" title="4.地址空间"></a>4.地址空间</h4><p>ASID用于区分不同的地址空间，因为同一虚拟地址在不同地址空间可以映射到不同的物理地址。这十分必要，因为若操作系统是多进程的，那么必须在操作系统里开辟不同的地址空间，每一个地址空间有一个映射关系。这就需要ASID进行区分。</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250406201014090.png" alt="image-20250406201014090"></p>
-<p>根据文档，ASID共有8位，也即256个地址空间。</p>
-<h4 id="5-tlb-invalidate"><a href="#5-tlb-invalidate" class="headerlink" title="5.tlb_invalidate"></a>5.tlb_invalidate</h4><p>tlb_invalidate调用tlb_out</p>
-<p>tlb_invalidate可以清楚某虚拟地址对应的tlb表项，从而释放tlb空间。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">LEAF(tlb_out)</span><br><span class="line">.set noreorder</span><br><span class="line">	mfc0    t0, CP0_ENTRYHI  //临时储存ENTRYHI的值到t0</span><br><span class="line">	mtc0    a0, CP0_ENTRYHI  //将调用参数传进来</span><br><span class="line">	nop</span><br><span class="line">	/* Step 1: Use &#x27;tlbp&#x27; to probe TLB entry */</span><br><span class="line">	/* Exercise 2.8: Your code here. (1/2) */</span><br><span class="line">	tlbp //检测tlb中是否有entry所对应的项</span><br><span class="line"></span><br><span class="line">	nop</span><br><span class="line">	/* Step 2: Fetch the probe result from CP0.Index */</span><br><span class="line">	mfc0    t1, CP0_INDEX  //将寻找的结果放到t1中</span><br><span class="line">.set reorder</span><br><span class="line">	bltz    t1, NO_SUCH_ENTRY   //如果没找到则跳转</span><br><span class="line">.set noreorder</span><br><span class="line">	mtc0    zero, CP0_ENTRYHI   //将辅助值全部清零</span><br><span class="line">	mtc0    zero, CP0_ENTRYLO0</span><br><span class="line">	mtc0    zero, CP0_ENTRYLO1</span><br><span class="line">	nop</span><br><span class="line">	/* Step 3: Use &#x27;tlbwi&#x27; to write CP0.EntryHi/Lo into TLB at CP0.Index  */</span><br><span class="line">	/* Exercise 2.8: Your code here. (2/2) */</span><br><span class="line">	tlbwi   //重写tlb表项，也就是删除原来找到的那个tlb</span><br><span class="line"></span><br><span class="line">.set reorder</span><br><span class="line"></span><br><span class="line">NO_SUCH_ENTRY:</span><br><span class="line">	mtc0    t0, CP0_ENTRYHI   //恢复原来的entry值</span><br><span class="line">	j       ra   //返回调用处</span><br><span class="line">END(tlb_out)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h4 id="6-三级页表自映射"><a href="#6-三级页表自映射" class="headerlink" title="6.三级页表自映射"></a>6.三级页表自映射</h4><p>页面大小4KB，故页偏移量需要12位。每级页表都需要9位，所以</p>
-<p>第二级目录基地址：(PTbase&lt;&lt;（9+3）)&gt;&gt;3+PTbase</p>
-<p>第三级页表目录基地址:(PTbase&lt;&lt;（9+9+3）)&gt;&gt;3+(PTbase&lt;&lt;（9+3）)&gt;&gt;3+PTbase</p>
-<p>自映射项：(PTbase&lt;&lt;（9+9+9+3）)&gt;&gt;3+(PTbase&lt;&lt;（9+9+3）)&gt;&gt;3+(PTbase&lt;&lt;（9+3）)&gt;&gt;3+PTbase</p>
-<h4 id="7-函数调用与CPU访存流程"><a href="#7-函数调用与CPU访存流程" class="headerlink" title="7.函数调用与CPU访存流程"></a>7.函数调用与CPU访存流程</h4><p>函数调用时，操作系统为函数开辟一个运行时栈，并依次递归存储函数。并将栈的地址写入CPU的PC寄存器。因此函数调用本质上就是CPU访存的过程。CPU将通过PC寄存器中存储的地址找到函数栈的位置，并依次递归调用，进一步找接下来的指令。</p>
-<h4 id="8-其他体系结构的内存管理"><a href="#8-其他体系结构的内存管理" class="headerlink" title="8.其他体系结构的内存管理"></a>8.其他体系结构的内存管理</h4><p>X86有三个不同的地址空间：逻辑地址、线性地址和物理地址，并且同时存在段页机制管理地址空间。而MIPS只有两种地址空间：物理地址和虚拟地址。因此在X86体系架构中，地址的转换是多级的。对于一个C程序中的地址，它是逻辑地址。需要先通过处理简单程序的段机制处理成线性地址，再由页机制整合，处理成实际的物理地址。</p>
-<h2 id="二、实验难点"><a href="#二、实验难点" class="headerlink" title="二、实验难点"></a>二、实验难点</h2><p>经过对多个文件的补全操作后，我认为这次实验的主要难点有二：</p>
-<p>其一是优美的使用宏定义。在代码中，许多不需要补全的部分使用了大量宏定义，这固然增加了代码的可读性，但也打散了代码的语法结构，需要先行阅读宏定义才能看懂。而需要补全的部分也需要使用宏定义使得代码变得优美，并且有些系统常量也需要找到对应宏定义才能确定。或许可以使用grep命令加速处理过程，即</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grep -rn <span class="string">&#x27;宏定义&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<p>该指令可以快速在所有文件中找到有相关宏的行，找到#define并阅读对应代码即可。</p>
-<p>其二是物理地址与虚拟地址的概念和确定较为混乱。解决方法为首先要确定访存流程：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250406221038374.png" alt="image-20250406221038374"></p>
-<p>而后要确定当前所写对象是虚拟地址还是物理地址，然后使用宏定义中的转换函数进行转换。</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250406221145532.png" alt="image-20250406221145532"></p>
-<h2 id="三、实验体会"><a href="#三、实验体会" class="headerlink" title="三、实验体会"></a>三、实验体会</h2><p>进入Lab2实验变得复杂了起来，这次跟着指导书多次尝试才完成实验。</p>
-<p>反思后认为，应当先多次阅读指导书，确定要做的事情以及解决问题的大致思路在开始写代码。</p>
-<p>另外我对于地址相关问题的掌握明显仍有欠缺，应当再次理解页表、虚拟地址、物理地址相关概念。</p>
-<p>（如后续复习有其他体会将在下方补充）</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/Lab2%20%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5h16zo0003s8ts2vg97n77" data-title="" class="article-share-link"><span class="fa fa-share">分享</span></a>
-      
-      
-      
-    </footer>
-  </div>
+      <header class="article-header">
+        
   
-</article>
-
-
-
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2025/05/01/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/">Lab0实验报告</a>
+    </h1>
   
-    <article id="post-Lab1 实验报告" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2025/05/01/Lab1%20%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" class="article-date">
-  <time class="dt-published" datetime="2025-05-01T14:39:21.576Z" itemprop="datePublished">2025-05-01</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
+
+      </header>
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h1 id="Lab1-实验报告"><a href="#Lab1-实验报告" class="headerlink" title="Lab1 实验报告"></a>Lab1 实验报告</h1><h2 id="一、思考题"><a href="#一、思考题" class="headerlink" title="一、思考题"></a>一、思考题</h2><h4 id="objdump参数和其它体系结构编译链接过程"><a href="#objdump参数和其它体系结构编译链接过程" class="headerlink" title="objdump参数和其它体系结构编译链接过程"></a>objdump参数和其它体系结构编译链接过程</h4><p>编译输出Hello world！的文件后反汇编输出如下（节选）</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250323191018943.png" alt="image-20250323191018943"></p>
-<p>链接成可执行文件后反汇编结果如下：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250323191313663.png" alt="image-20250323191313663"></p>
-<p>输出内容长了许多，并且恰如指导书指出的，在printf处填上了调用的地址。</p>
-<p>使用类似的操作，用MIPS交叉编译工具链分析代码，获得了如下结果：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250323191622241.png" alt="image-20250323191622241"></p>
-<p>链接后：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250323191736788.png" alt="image-20250323191736788"></p>
-<p>主要区别体现在了对gp的赋值，与原生gcc的情况类似。</p>
-<p>此外通过man指令得知，objdump的参数中，-D表示反汇编所有部分的内容，-S表示输出与反汇编对应的源代码。</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250323192117739.png" alt="image-20250323192117739"></p>
-<h4 id="readelf的程序问题"><a href="#readelf的程序问题" class="headerlink" title="readelf的程序问题"></a>readelf的程序问题</h4><p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250323192933951.png" alt="image-20250323192933951"></p>
-<p>如图，使用编写的readelf解析readelf后不会有任何输出，但是调用系统的readelf解析我们写的readelf，则输出节选如下：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250323193033517.png" alt="image-20250323193033517"></p>
-<p>进行一些观察：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250323193207723.png" alt="image-20250323193207723"></p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250323193422004.png" alt="image-20250323193422004"></p>
-<p>hello与readelf的编译方式似乎有些不同。hello在编译时要求生成了32位架构的文件。所以不能识别readelf的问题在于架构不同。</p>
-<h4 id="内核入口地址的问题"><a href="#内核入口地址的问题" class="headerlink" title="内核入口地址的问题"></a>内核入口地址的问题</h4><p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250323194745365.png" alt="image-20250323194745365"></p>
-<p>回顾启动的基本步骤，再第一步中启动程序由写在ROM中的BootLoader执行，该程序会保证在第一阶段结束时正确跳转到内核入口并开始第二阶段。</p>
-<h2 id="难点分析"><a href="#难点分析" class="headerlink" title="难点分析"></a>难点分析</h2><p>本次作业信息量巨大，从无到有解除了许多概念，难以理解，下面进行一些整理。</p>
-<h4 id="ELF文件"><a href="#ELF文件" class="headerlink" title="ELF文件"></a>ELF文件</h4><p>也就是目标文件或者可执行文件，指导书给出了一个清晰的文件结构图：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250323195453285.png" alt="image-20250323195453285"></p>
-<p>该图明确节和段是两种不同描述ELF的方法，该方法的参数，如大小，地址等均提前确定好。空间被平均分为了若干节或段。第一节节头位域binary+e_shoff，程序头起点位于binary+e_phoff，若要访问指定节，地址依次增加对应的大小即可。</p>
-<h4 id="内存布局"><a href="#内存布局" class="headerlink" title="内存布局"></a>内存布局</h4><p>不同的指令体系有不同的空间布局，不同平台的运行接口也不一样。因此，在编译程序后链接时，需要将操作指令已经变量储存到应该存储的位置。通过有指令设置.text、.bss、.data的地址（他们都是ELF内的节），来确定存储的位置，从而正确的使用数据。</p>
-<p>另外，在链接器链接时还需要_start函数。该函数将栈指针设置到栈帧空间起点的位置上，并跳转到mips_init的位置。</p>
-<p>如此，数据存储和运行栈帧空间全部解决，可以开始执行C程序了。</p>
-<h4 id="实现printk"><a href="#实现printk" class="headerlink" title="实现printk"></a>实现printk</h4><p>整体逻辑是printk调用vprintfmt这个函数，这个函数根据传进来的参数，确定要输出的格式。输出时有machine.c完成，通过读写某一个特殊的地址来向控制台输出字符。</p>
-<p>C语言实现上没有任何可以取巧的地方，需要暴力的处理每一种可能的输入格式并正确调用对应函数完成输出。对照格式说明依次完成即可。</p>
-<h2 id="实验体会"><a href="#实验体会" class="headerlink" title="实验体会"></a>实验体会</h2><p>第一次实验还没有完全适应，在完成代码编写时难以理解整体结构，甚至难以理解我在写什么。</p>
-<p>一个合适的方法是在撰写实验报告时重新浏览指导书，结合在实验中完成的内容理解干了什么，怎么干的。</p>
-<p>另外由于系统没有自动纠错功能，下次写代码时一定要多加小心。我认为我仍需要再次理解指导书内容，并预习Lab2。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/Lab1%20%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5h16zk0001s8ts5b87affz" data-title="" class="article-share-link"><span class="fa fa-share">分享</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-Lab0 实验报告" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2025/05/01/Lab0%20%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" class="article-date">
-  <time class="dt-published" datetime="2025-05-01T14:39:21.568Z" itemprop="datePublished">2025-05-01</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h1 id="Lab0-实验报告"><a href="#Lab0-实验报告" class="headerlink" title="Lab0 实验报告"></a>Lab0 实验报告</h1><h2 id="一、思考题"><a href="#一、思考题" class="headerlink" title="一、思考题"></a>一、思考题</h2><h3 id="Thinking-0-1-Git-的使用1"><a href="#Thinking-0-1-Git-的使用1" class="headerlink" title="Thinking 0.1 Git 的使用1"></a>Thinking 0.1 Git 的使用1</h3><p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250228111537702.png" alt="image-20250228111537702"></p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250228111600112.png" alt="image-20250228111600112"></p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250228111619791.png" alt="image-20250228111619791"></p>
+        <h1 id="Lab0-实验报告"><a href="#Lab0-实验报告" class="headerlink" title="Lab0 实验报告"></a>Lab0 实验报告</h1><h2 id="一、思考题"><a href="#一、思考题" class="headerlink" title="一、思考题"></a>一、思考题</h2><h3 id="Thinking-0-1-Git-的使用1"><a href="#Thinking-0-1-Git-的使用1" class="headerlink" title="Thinking 0.1 Git 的使用1"></a>Thinking 0.1 Git 的使用1</h3><p><img src="/.%5Cimage%5Cimage-20250228111537702.png" alt="image-20250228111537702"></p>
+<p><img src="/.%5Cimage%5Cimage-20250228111600112.png" alt="image-20250228111600112"></p>
+<p><img src="/.%5Cimage%5Cimage-20250228111619791.png" alt="image-20250228111619791"></p>
 <p>通过实践得到了三个status的输出内容。不使用add指令时README.txt是为跟踪的文件，使用add指令后变为要提交的变更，而提交后若对文件修改，则变为“尚未暂存以备提交的变更”，此时需要再次add并commit以提交。内容不同的原因在于前者处于Untracked状态而后者处于Modified状态。</p>
-<h3 id="Thinking-0-2-箭头与命令"><a href="#Thinking-0-2-箭头与命令" class="headerlink" title="Thinking 0.2 箭头与命令"></a>Thinking 0.2 箭头与命令</h3><p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250228112228961.png" alt="image-20250228112228961"></p>
+<h3 id="Thinking-0-2-箭头与命令"><a href="#Thinking-0-2-箭头与命令" class="headerlink" title="Thinking 0.2 箭头与命令"></a>Thinking 0.2 箭头与命令</h3><p><img src="/.%5Cimage%5Cimage-20250228112228961.png" alt="image-20250228112228961"></p>
 <p>其中Add the file对应git add；stage the file也对应git add；commit对应git commit -m “note”</p>
 <h3 id="Thinking-0-3-Git的一些场景"><a href="#Thinking-0-3-Git的一些场景" class="headerlink" title="Thinking 0.3 Git的一些场景"></a>Thinking 0.3 Git的一些场景</h3><p>代码文件print.c被错误删除时，应当使用git checkout – print.c</p>
 <p>代码文件print.c被错误删除后，执行了git rm print.c命令，应当使用git reset HEAD print.c</p>
 <p>无关文件hello.txt已经被添加到暂存区时，若要在不删除此文件的前提下将其移出暂存区，应当使用git rm –cached hello.txt</p>
 <h3 id="Thinking-0-4-Git的使用2"><a href="#Thinking-0-4-Git的使用2" class="headerlink" title="Thinking 0.4 Git的使用2"></a>Thinking 0.4 Git的使用2</h3><p>进行三次提交后获得log如下：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250302003221123.png" alt="image-20250302003221123"></p>
+<p><img src="/.%5Cimage%5Cimage-20250302003221123.png" alt="image-20250302003221123"></p>
 <p>进行版本回退后log如下：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250302003346057.png" alt="image-20250302003346057"></p>
+<p><img src="/.%5Cimage%5Cimage-20250302003346057.png" alt="image-20250302003346057"></p>
 <p>利用哈希值指定回退到第一次提交后，log如下：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250302003417556.png" alt="image-20250302003417556"></p>
+<p><img src="/.%5Cimage%5Cimage-20250302003417556.png" alt="image-20250302003417556"></p>
 <p>使用第3次提交的哈希值回复回退操作，log如下：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250302003500094.png" alt="image-20250302003500094"></p>
-<h3 id="Thinking-0-5-echo的使用"><a href="#Thinking-0-5-echo的使用" class="headerlink" title="Thinking 0.5 echo的使用"></a>Thinking 0.5 echo的使用</h3><p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250302003725640.png" alt="image-20250302003725640"></p>
+<p><img src="/.%5Cimage%5Cimage-20250302003500094.png" alt="image-20250302003500094"></p>
+<h3 id="Thinking-0-5-echo的使用"><a href="#Thinking-0-5-echo的使用" class="headerlink" title="Thinking 0.5 echo的使用"></a>Thinking 0.5 echo的使用</h3><p><img src="/.%5Cimage%5Cimage-20250302003725640.png" alt="image-20250302003725640"></p>
 <p>指令执行结果如下。&gt;可以将输出内容输入到文件之中，若不存在文件则新建，若已有文件则覆盖。&gt;&gt;则是在文件末尾添加输出内容。</p>
 <h3 id="Thinking-0-6-文件的操作"><a href="#Thinking-0-6-文件的操作" class="headerlink" title="Thinking 0.6 文件的操作"></a>Thinking 0.6 文件的操作</h3><p>command和result内容如下：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250302005052582.png" alt="image-20250302005052582"></p>
+<p><img src="/.%5Cimage%5Cimage-20250302005052582.png" alt="image-20250302005052582"></p>
 <p> echo echo Shell Start 与 echo ‘echo Shell Start’ 效果没有区别；但是 echo echo $c&gt;file1 与echo echo $c&gt;file1 效果有区别。因为重定向和echo的优先级冲突了。</p>
-<h2 id="二、难点分析"><a href="#二、难点分析" class="headerlink" title="二、难点分析"></a>二、难点分析</h2><p>1.sed -n ‘8p’ <file> 可以用来输出文件中第8行的内容。</p>
+<h2 id="二、难点分析"><a href="#二、难点分析" class="headerlink" title="二、难点分析"></a>二、难点分析</h2><p>1.sed -n ‘8p’ &lt;file&gt; 可以用来输出文件中第8行的内容。</p>
 <p>2.删除文件使用rm指令，重命名可以使用mv指令实现。</p>
-<p>3.grep -n <str> <file> 可以获取文件中所有字符串str出现的行数。输出格式为：“行号:那一行的内容”。</p>
-<p>4.可以用awk相关指令对文件某一行内容进行划分并输出，格式为awk -F: ‘{print $1}’ <file>这里的冒号意为以冒号为分界进行划分。$1为输出划分后的第一部分</p>
-<p>5.使用sed ‘s&#x2F;str1&#x2F;str2&#x2F;g’ <file>输出将str1替换为str2后的结果。需要注意的是，若字符串是变量，不能直接把str1改为$1，而应该通过字符串拼接的方式完成。Shell中字符串拼接直接将两个字符串并排放在一起即可。</p>
+<p>3.grep -n &lt;str&gt; &lt;file&gt; 可以获取文件中所有字符串str出现的行数。输出格式为：“行号:那一行的内容”。</p>
+<p>4.可以用awk相关指令对文件某一行内容进行划分并输出，格式为awk -F: ‘{print $1}’ &lt;file&gt;这里的冒号意为以冒号为分界进行划分。$1为输出划分后的第一部分</p>
+<p>5.使用sed ‘s&#x2F;str1&#x2F;str2&#x2F;g’ &lt;file&gt;输出将str1替换为str2后的结果。需要注意的是，若字符串是变量，不能直接把str1改为$1，而应该通过字符串拼接的方式完成。Shell中字符串拼接直接将两个字符串并排放在一起即可。</p>
 <p>6.若要编译许多.c文件成一个可执行文件。则需要先使用gcc -c code.c -o code.o将文件转换成机器代码，此时生成的文件称作目标文件。然后，通过gcc code1.o code2.o -o out将多个文件链接成一个可执行文件。</p>
 <p>7.注意#include的文件默认在&#x2F;usr&#x2F;include下寻找。若想导入的库不在该目录下，则需要在预处理时使用参数-I <PATH>导入对应库，其中PATH指需要导入库的路径。</p>
-<p>8.Makefile可以对子目录的Makefile进行调用，方法为：“$(MAKE) <arg> -C <PATH>”，其中arg为用make sth.调用Makefile时sth.的内容，若缺项则默认为以make的方式调用，也即访问第一个target。PATH处填想调用哪一个子目录中的Makefile</p>
+<p>8.Makefile可以对子目录的Makefile进行调用，方法为：“$(MAKE) &lt;arg&gt; -C &lt;PATH&gt;”，其中arg为用make sth.调用Makefile时sth.的内容，若缺项则默认为以make的方式调用，也即访问第一个target。PATH处填想调用哪一个子目录中的Makefile</p>
 <h2 id="三、实验体会"><a href="#三、实验体会" class="headerlink" title="三、实验体会"></a>三、实验体会</h2><p>初步了解了Unix系统的使用方法，需要的指令较多难以完全记住，要通过不断实践来强化记忆。</p>
 <p>操作方面需要注意文件不能一边读取一遍写入，最终会得到空文件。应当先建立一个临时的中间文件保存，最后再删去。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/Lab0%20%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5h16zn0002s8ts6qbge6sm" data-title="" class="article-share-link"><span class="fa fa-share">分享</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-Lab3 实验报告" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2025/05/01/Lab3%20%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" class="article-date">
-  <time class="dt-published" datetime="2025-05-01T14:39:21.542Z" itemprop="datePublished">2025-05-01</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h1 id="Lab3-实验报告"><a href="#Lab3-实验报告" class="headerlink" title="Lab3 实验报告"></a>Lab3 实验报告</h1><p>本次实验主要实现进程的创建与运行，以及实现进程调度。</p>
-<h3 id="思考题"><a href="#思考题" class="headerlink" title="思考题"></a>思考题</h3><h4 id="1-对物理地址和虚拟地址的理解"><a href="#1-对物理地址和虚拟地址的理解" class="headerlink" title="1.对物理地址和虚拟地址的理解"></a>1.对物理地址和虚拟地址的理解</h4><p>由自映射机制，UVPT处向上的部分是进程页表，而UVPT本身的这一项指向了自己。因此这一条语句就是将UVPT所在的这个页表项指向自己。</p>
-<h4 id="2-data的作用"><a href="#2-data的作用" class="headerlink" title="2.data的作用"></a>2.data的作用</h4><p>data出现在函数load_icode_mapper中：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Env</span> *<span class="title">env</span> =</span> (<span class="keyword">struct</span> Env *)data;</span><br></pre></td></tr></table></figure>
-
-<p>data可以接受一个任意类型的指针，并将其转换成进程类型的指针。从而找到进程的位置并载入镜像。</p>
-<p>没有data不可以因为env将无从寻找。</p>
-<h4 id="3-elf-load-seg的不同情况"><a href="#3-elf-load-seg的不同情况" class="headerlink" title="3.elf_load_seg的不同情况"></a>3.elf_load_seg的不同情况</h4><p>该函数代码如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">elf_load_seg</span><span class="params">(Elf32_Phdr *ph, <span class="type">const</span> <span class="type">void</span> *bin, <span class="type">elf_mapper_t</span> map_page, <span class="type">void</span> *data)</span> &#123;</span><br><span class="line">	u_long va = ph-&gt;p_vaddr;</span><br><span class="line">	<span class="type">size_t</span> bin_size = ph-&gt;p_filesz;</span><br><span class="line">	<span class="type">size_t</span> sgsize = ph-&gt;p_memsz;</span><br><span class="line">	u_int perm = PTE_V;</span><br><span class="line">	<span class="keyword">if</span> (ph-&gt;p_flags &amp; PF_W) &#123;</span><br><span class="line">		perm |= PTE_D;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="type">int</span> r;</span><br><span class="line">	<span class="type">size_t</span> i;</span><br><span class="line">	u_long offset = va - ROUNDDOWN(va, PAGE_SIZE);</span><br><span class="line">	<span class="keyword">if</span> (offset != <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="keyword">if</span> ((r = map_page(data, va, offset, perm, bin,</span><br><span class="line">				  MIN(bin_size, PAGE_SIZE - offset))) != <span class="number">0</span>) &#123;</span><br><span class="line">			<span class="keyword">return</span> r;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Step 1: load all content of bin into memory. */</span></span><br><span class="line">	<span class="keyword">for</span> (i = offset ? MIN(bin_size, PAGE_SIZE - offset) : <span class="number">0</span>; i &lt; bin_size; i += PAGE_SIZE) &#123;</span><br><span class="line">		<span class="keyword">if</span> ((r = map_page(data, va + i, <span class="number">0</span>, perm, bin + i, MIN(bin_size - i, PAGE_SIZE))) !=</span><br><span class="line">		    <span class="number">0</span>) &#123;</span><br><span class="line">			<span class="keyword">return</span> r;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Step 2: alloc pages to reach `sgsize` when `bin_size` &lt; `sgsize`. */</span></span><br><span class="line">	<span class="keyword">while</span> (i &lt; sgsize) &#123;</span><br><span class="line">		<span class="keyword">if</span> ((r = map_page(data, va + i, <span class="number">0</span>, perm, <span class="literal">NULL</span>, MIN(sgsize - i, PAGE_SIZE))) != <span class="number">0</span>) &#123;</span><br><span class="line">			<span class="keyword">return</span> r;</span><br><span class="line">		&#125;</span><br><span class="line">		i += PAGE_SIZE;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>首先要检查页面是否有效，而后将页面地址对齐。</p>
-<p>而后将所有bin中的内容load进内存空间，需要比较页面地址与bin空间大小的关系。</p>
-<p>最后还要比较内存空间与bin空间的大小并申请合适的页空间。</p>
-<h4 id="4-EPC的含义"><a href="#4-EPC的含义" class="headerlink" title="4.EPC的含义"></a>4.EPC的含义</h4><p>这里的env_tf.cp0_epc字段指示了进程恢复运行时PC应恢复到的位置。我们要运行的 进程的代码段预先被载入到了内存中，且程序入口为e_entry，当我们运行进程时，CPU将自动从PC所指的位置开始执行二进制码。</p>
-<p>因此，env_tf.cp0_epc中存储了要跳转的指令地址的起始地址，该地址是虚拟地址。</p>
-<h4 id="5-异常处理函数的实现位置"><a href="#5-异常处理函数的实现位置" class="headerlink" title="5.异常处理函数的实现位置"></a>5.异常处理函数的实现位置</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;asm/asm.h&gt;</span><br><span class="line">#include &lt;stackframe.h&gt;</span><br><span class="line"></span><br><span class="line">.macro BUILD_HANDLER exception handler</span><br><span class="line">NESTED(handle_\exception, TF_SIZE + 8, zero)</span><br><span class="line">        move    a0, sp</span><br><span class="line">        addiu   sp, sp, -8</span><br><span class="line">        jal     \handler</span><br><span class="line">        addiu   sp, sp, 8</span><br><span class="line">        j       ret_from_exception</span><br><span class="line">END(handle_\exception)</span><br><span class="line">.endm</span><br><span class="line"></span><br><span class="line">.text</span><br><span class="line"></span><br><span class="line">FEXPORT(ret_from_exception)</span><br><span class="line">        RESTORE_ALL</span><br><span class="line">        eret</span><br><span class="line"></span><br><span class="line">NESTED(handle_int, TF_SIZE, zero)</span><br><span class="line">        mfc0    t0, CP0_CAUSE</span><br><span class="line">        mfc0    t2, CP0_STATUS</span><br><span class="line">        and     t0, t2</span><br><span class="line">        andi    t1, t0, STATUS_IM7</span><br><span class="line">        bnez    t1, timer_irq</span><br><span class="line">timer_irq:</span><br><span class="line">        li      a0, 0</span><br><span class="line">        j       schedule</span><br><span class="line">END(handle_int)</span><br></pre></td></tr></table></figure>
-
-<p>使用grep指令查找发现异常初始化相关定义位于kern&#x2F;genex.S，内容是朴素的将异常码填充到相应的地址位置。</p>
-<h4 id="6-时钟的设置"><a href="#6-时钟的设置" class="headerlink" title="6.时钟的设置"></a>6.时钟的设置</h4><p>时钟中断与时间片调度机制紧密相关。当一个进程所持有的时间片走到尽头时，则触发时钟中断以切换进程。初始化MOS始终后Count会随时间流逝不断增加，当CP0中Count寄存器与Compare寄存器的值相等时触发时钟中断。随后交由genex.S处理中断，初始化中断问题后进行调度以结束时钟中断。</p>
-<h4 id="7-进程的调度"><a href="#7-进程的调度" class="headerlink" title="7.进程的调度"></a>7.进程的调度</h4><p>触发时钟调度，而后调用handle_int处理中断，而后跳转到schedule进行进程调度。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">schedule</span><span class="params">(<span class="type">int</span> yield)</span> &#123;</span><br><span class="line">	<span class="type">static</span> <span class="type">int</span> count = <span class="number">0</span>; <span class="comment">// remaining time slices of current env</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">Env</span> *<span class="title">e</span> =</span> curenv;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (yield || count == <span class="number">0</span> || e == <span class="literal">NULL</span> || e-&gt;env_status != ENV_RUNNABLE) &#123;</span><br><span class="line">		<span class="keyword">if</span> (e != <span class="literal">NULL</span> &amp;&amp; e-&gt;env_status == ENV_RUNNABLE) &#123;</span><br><span class="line">			TAILQ_REMOVE(&amp;env_sched_list, e, env_sched_link);</span><br><span class="line">			TAILQ_INSERT_TAIL(&amp;env_sched_list, e, env_sched_link);</span><br><span class="line">		&#125;</span><br><span class="line">		e = TAILQ_FIRST(&amp;env_sched_list);</span><br><span class="line">		<span class="keyword">if</span> (e == <span class="literal">NULL</span>) &#123;</span><br><span class="line">			panic(<span class="string">&quot;no runnable env when schedule!\n&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		count = e-&gt;env_pri;</span><br><span class="line">	&#125;</span><br><span class="line">	count--;</span><br><span class="line">	env_run(e);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>schedule函数中，要考察进程是否需要强制切换，是否进程的运行次数为0，是否变为了非执行状态。若有一个条件满足，那么需要切换进程，即从调度队列里面选一个进程执行。反之直接使当前进程继续执行即可。</p>
-<h3 id="难点分析"><a href="#难点分析" class="headerlink" title="难点分析"></a>难点分析</h3><p>本次实验只需要实现进程构建以及异常与中断的处理。</p>
-<h4 id="线程构建方面"><a href="#线程构建方面" class="headerlink" title="线程构建方面"></a>线程构建方面</h4><p>每一个进程都由一个进程控制块PCB控制，实验中PCB由一个Env结构体实现。结构体中的变量最为关键，分别是：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Env</span> &#123;</span></span><br><span class="line"> 	<span class="class"><span class="keyword">struct</span> <span class="title">Trapframe</span> <span class="title">env_tf</span>;</span></span><br><span class="line"> 	LIST_ENTRY(Env) env_link; </span><br><span class="line"> 	u_int env_id;</span><br><span class="line"> 	u_int env_parent_id;</span><br><span class="line"> 	u_int env_status;</span><br><span class="line"> 	Pde *env_pgdir;</span><br><span class="line"> 	TAILQ_ENTRY(Env) env_sched_link; </span><br><span class="line"> 	u_int env_pri;</span><br><span class="line"> &#125;;</span><br></pre></td></tr></table></figure>
-
-<p>其中env_tf用于保存上下文信息，通过一个结构体保存。当进程陷入内核或者发生调度时需要将环境信息储存在这里</p>
-<p>env_link用于构建进程链表</p>
-<p>env_id是该进程的id，每个进程的id会保证不相同</p>
-<p>env_parent_id是该进程的父进程的id。进程是可以通过fork被其他进程创建</p>
-<p>env_status表示进程的当前状态，分别是空闲状态（ENV_FREE）表示该控制块没有被任何进程使用；阻塞状态（ENV_NOT_RUNNABLE）表示进程被阻塞需要一定的操作冲洗变为就绪状态；执行或就绪状态（ENV_RUNNABLE）进程正在执行或等待被调度，调度时只需要从这里选择一个进程执行即可。</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250422110633410.png" alt="image-20250422110633410"></p>
-<p>env_pgdir表示该进程页目录的内核虚拟地址</p>
-<p>env_sched_link用于构建调度队列的链表（env_sched_list）</p>
-<p>env_pri表示进程优先级</p>
-<p>因此进程处理的核心就是构建一个PCB并且将一个进程的相关信息全部载入，并在阻塞队列和就绪队列之间来回调度即可。</p>
-<h4 id="中断与异常部分"><a href="#中断与异常部分" class="headerlink" title="中断与异常部分"></a>中断与异常部分</h4><p>中断可以视作一种特殊的异常。</p>
-<p>异常发生后先由genex.S初始化，即将异常原因存入相关地址中，而后entry.S会进行异常分发，识别异常码并跳转到对应的异常处理程序处进行异常处理。</p>
-<p>另外对于特别的时钟中断，也即时间片到时间时发生的中断，需要对进程进行调度，这里的逻辑非常简单：</p>
-<p>判断是否需要强制调度？进程运行结束了吗？进程是否不再就绪？</p>
-<p>如果满足这三个条件其一，就要切换进程，也就是从就绪队列里面根据调度算法选择一个进程执行。反之，不妨继续运行这个程序即可。</p>
-<h3 id="实验体会"><a href="#实验体会" class="headerlink" title="实验体会"></a>实验体会</h3><p>相比上一次实验难度稍微下降了一点。这次主要需要理解的就是进程本身的概念以及进程调度的相关方法。我的实验方法为反复阅读基本的结构体定义，以及理论课上所讲的相关进程调度方法，通过先确定大体实现方法在写代码的方式理解代码，并完成实验。</p>
-<p>下一步是学习有关的进程调度方式并实践。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/Lab3%20%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5h16zp0004s8ts7c3lgkpi" data-title="" class="article-share-link"><span class="fa fa-share">分享</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-北航2025面向对象第一单元博客作业" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2025/05/01/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%B8%80%E5%8D%95%E5%85%83%E5%8D%9A%E5%AE%A2%E4%BD%9C%E4%B8%9A/" class="article-date">
-  <time class="dt-published" datetime="2025-05-01T14:39:04.785Z" itemprop="datePublished">2025-05-01</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h1 id="北航2025面向对象第一单元博客作业"><a href="#北航2025面向对象第一单元博客作业" class="headerlink" title="北航2025面向对象第一单元博客作业"></a>北航2025面向对象第一单元博客作业</h1><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>本单元的基本任务是完成含变量、三角、导数和自定义函数的带幂次表达式解析并展开所有括号。额外任务是将展开后的表达式化简使其尽可能简短。</p>
-<p>在经过先导课程的洗礼之后，第一次作业一上来还是极其手足无措的，不过好在，我通过三次迭代逐渐体会到了面向对象的感觉。</p>
-<h3 id="基本架构"><a href="#基本架构" class="headerlink" title="基本架构"></a>基本架构</h3><p>在main类中按时间依次执行读入、解析、展开化简、输出四个步骤。</p>
-<p>建立表达式、项、因子三个类（没有像其他很多同学设置单项式和多项式类，我认为单项式和多项式都可以视作表达式直接处理），这三个类相互协作即可完成全部任务。</p>
-<p>​	1.读入部分：scanner依次读入自定义函数和需要化简的表达式，并转化为不同Token</p>
-<p>​	2.解析：利用递归下降写parser类，向下解析每一层表达式。</p>
-<p>​	3.展开化简：核心是写一个simplified方法，表达式的simplified即可向下转化成若干项的simplified，项的simplified又可以向下转化成若干因子的simplified。所有simplified都返回一个表达式，这样可以将展开化简转化成表达式之间的运算。一个简单的思维导图如下：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250320143033393.png" alt="image-20250320143033393"></p>
-<p>​	4.输出：递归下降输出每一个实例，并对项之间的输出顺序做简单调整。</p>
-<p>类图如下：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250320145909121.png" alt="image-20250320145909121"></p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250320150258983.png" alt="image-20250320150258983"></p>
-<p>采用IDEA生成类和方法，再自行根据调用连接箭头的方式画出了类图。就美观而言我认为类图还是相对比较优美的，形成了一个扎实对称的三角形，具有很强的稳定性。</p>
-<p>考虑如果未来变量不止存在x，三角因子和函数调用内部不止输入因子，我的代码都可以快速实现。若幂次允许存在变量，由于我设置了power类也可以快速实现。若需要添加新的因子如数列求和因子等，则可类似加入求导因子一般，建立一个新的因子类与因子接口连接，实现所有接口内的方法即可。</p>
-<p>下面我将具体分析我的迭代过程：</p>
-<h3 id="第一次迭代"><a href="#第一次迭代" class="headerlink" title="第一次迭代"></a>第一次迭代</h3><h4 id="我的实现"><a href="#我的实现" class="headerlink" title="我的实现"></a>我的实现</h4><p>第一次作业只需要实现多项式化简，也许正是因为这一点，许多同学直接新建多项式和单项式类。我考虑到单项式的可拓展性较差，不如直接对Term化简，也能完成相似的任务。同时我还考虑了一些未来可能出现的情况，如需要化简一个多变量表达式。对此，我的Term必然需要采用Arraylist存储不同的因子，而非直接用HashMap存储系数和幂次（虽然第一次作业只可能出现一个Factor），另外，在合并时直接遍历所有的非常熟Factor是否相同再进行合并即可。正是这一步考虑让我后面的迭代不存在任何重构。</p>
-<p>对于其他实现上的细节：</p>
-<p>1.Term类中需要写一个getNum方法，以快速找到常数项（这是没有写单项式类需要额外做的唯一事情），若没有常数项则填一个1上去。</p>
-<p>2.我给变量参数x和指数power都额外设置了一个类，以防后续会在指数和变量上做文章，结果来看属于冗余设计。</p>
-<h4 id="Bug-Hack"><a href="#Bug-Hack" class="headerlink" title="Bug &amp; Hack"></a>Bug &amp; Hack</h4><p>由于许久没有写Java程序了，在代码中犯了一个重大错误：部分分析没有深克隆，导致方法中的运算改变了方法的参数。该bug我在写完全部程序才发现，而debug的方式也非常简单，通过构造样例二分缩小范围，寻找数据在哪里意外发生变化即可。</p>
-<p>其余bug是对0次幂的处理不完全，在幂因子处没有换成1，属于低级错误。</p>
-<p>第一次作业只hack到一位同学，该同学对0次幂的处理有些问题，略微构造数据即可发现其问题。</p>
-<h4 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h4><p>进行普通的单项式合并后表达式已然化到最简，剩余的唯一一个优化是如果整个表达式中存在正的Term，则第一项先输出正项，从而少输出一个符号。该优化写在输出类中不会增加多少代码复杂度。</p>
-<h3 id="第二次迭代"><a href="#第二次迭代" class="headerlink" title="第二次迭代"></a>第二次迭代</h3><h4 id="我的实现-1"><a href="#我的实现-1" class="headerlink" title="我的实现"></a>我的实现</h4><p>鉴于我第一次的架构比较可拓展，添加一个三角因子没有造成任何影响，合并不同项仍然是判断因子是否全部相同。</p>
-<p>而自定义递归函数则稍显复杂。首先递归函数的解析比较暴力，需要一个一个手动跳过大括号，读入数字，再跳过小括号，读入各因子，再跳过等号，读入表达式等等。幸好这些只需要在一个输入类写完即可。而后我才用预处理的方式，先计算出所有不大于5的函数值，需要时直接用一个方法调用计算即可。由于调用时还需要用因子替换形式参数，所以需要再写一个replace方法，该方法读入形式参数和实际调用参数，向下递归调用深层的replace最终完成替换。注意一定要一次读入全部形式参数，依次替换可能会导致先替换y成x，而后再替换x时出现问题。</p>
-<h4 id="优化-1"><a href="#优化-1" class="headerlink" title="优化"></a>优化</h4><p>问题的重点来到了优化，参考评论区精华帖所提到的提取公因式方法，的确可以完成优化，然而过程实在比较复杂，大幅提高了我的代码复杂度，也为这次作业的失败埋下了雷。</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250320153416920.png" alt="image-20250320153416920"></p>
-<p>我通过这一页ppt展示了提取公因式的简短解释，思路简单。</p>
-<p>为同时实现两三角因子括号内因子若恰为相反数的合并。在提取公因式时可认为括号内差一个符号的三角因子也是相同的，并同步记录正负符号。</p>
-<p>而后判断不同的因子的情况：</p>
-<p>若完全没有不同的因子，则直接合并，也就是第一次作业的合并方式。</p>
-<p>若不同的因子恰构成了sin^2+cos^2，则选取系数绝对值较小的那个数，合并这么多的项转化成1.</p>
-<p>若不同的因子恰构成了1-sin^2或1-cos^2，且系数相同，则进行化简。</p>
-<p>若不同的因子恰构成了诸如sincos+cossin之类的和角公式且系数相同，则将括号内的表达式相加并合并成一项。</p>
-<p>合并多个项时，考虑到可能合并后再次参与合并。因此可以将合并后的新项压栈，完成合并后再对栈内的项进行二次合并。</p>
-<p>完成合并后，再输出之前，可以对单项进行简化。若三角因子括号中的项是一个因子加一个负号，则可以将负号吐出三角因子之外并去掉三角因子内的二层括号。</p>
-<h4 id="Bug-Hack-1"><a href="#Bug-Hack-1" class="headerlink" title="Bug&amp;Hack"></a>Bug&amp;Hack</h4><p>构造了一些样例，发现没问题后直接进去强测，然而直接挂了。实在非常痛苦。bug非常低级：因子的replace函数，将cos replace后产生的因子，由于复制粘贴，写成sin了，直接炸了十多个点。此外还有一个小bug是提取公因式时没有深克隆，故若出现类似sin^2cos+2cos^3之类的项时，cos会被新产生的两个项共用，没有分开。</p>
-<p>过了的点只有一个不是100分，然而这没有任何用。</p>
-<p>没进互测，自然没有什么hack经验，也正因没进互测，没有人帮我额外debug，给下一次作业再次埋雷。</p>
-<h3 id="第三次迭代"><a href="#第三次迭代" class="headerlink" title="第三次迭代"></a>第三次迭代</h3><h4 id="我的实现-2"><a href="#我的实现-2" class="headerlink" title="我的实现"></a>我的实现</h4><p>这次迭代再次体现了我架构的优异性，添加普通函数，只需要视作它是n&#x3D;0的递归函数即可。添加求导因子，在simplify时使用求导公式递归解决即可，用了一节早八一个小时就完成了这次迭代。</p>
-<h4 id="Bug-Hack-2"><a href="#Bug-Hack-2" class="headerlink" title="Bug&amp;Hack"></a>Bug&amp;Hack</h4><p>然而，第二次作业的bug发力了，由于我的三角因子创建实例时的接口设置成了factor，导致我每新建一个三角因子都要调用一下复杂度较高的simplify方法，并且我的代码其他地方也存在由于不放心而滥用simplify的现象，理所当然的，我被卡了TLE并被hack两次。</p>
-<p>实际上现在回头来看，在我的架构下，完全可以把三角因子内部的输入视作一个表达式，这样也省去了一步化简过程，减少时间消耗和程序复杂度，可惜当时为了和指导书保持一致没有采取这种方法</p>
-<p>hack别人时，主要针对新加的求导因子，将求导因子内部用0组合构造样例。</p>
-<h3 id="复杂度分析"><a href="#复杂度分析" class="headerlink" title="复杂度分析"></a>复杂度分析</h3><p>先通过IDEA分析类复杂度。</p>
-<table>
-<thead>
-<tr>
-<th>Class</th>
-<th>OCavg</th>
-<th>OCmax</th>
-<th>WMC</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>DaoFactor</td>
-<td>1.08</td>
-<td>2</td>
-<td>14</td>
-</tr>
-<tr>
-<td>DefinedFunction</td>
-<td>1.5</td>
-<td>5</td>
-<td>12</td>
-</tr>
-<tr>
-<td>Expr</td>
-<td>2.63</td>
-<td>8</td>
-<td>50</td>
-</tr>
-<tr>
-<td>ExprFactor</td>
-<td>1.15</td>
-<td>3</td>
-<td>15</td>
-</tr>
-<tr>
-<td>FunctionFactor</td>
-<td>1.19</td>
-<td>3</td>
-<td>19</td>
-</tr>
-<tr>
-<td>Input</td>
-<td>2</td>
-<td>3</td>
-<td>4</td>
-</tr>
-<tr>
-<td>Lexer</td>
-<td><font color='red'>5</font></td>
-<td>15</td>
-<td>25</td>
-</tr>
-<tr>
-<td>MainClass</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-</tr>
-<tr>
-<td>Num</td>
-<td>1.04</td>
-<td>2</td>
-<td>28</td>
-</tr>
-<tr>
-<td>Parser</td>
-<td>2.41</td>
-<td>7</td>
-<td>41</td>
-</tr>
-<tr>
-<td>Power</td>
-<td>1.15</td>
-<td>2</td>
-<td>15</td>
-</tr>
-<tr>
-<td>PowerFactor</td>
-<td>1.23</td>
-<td>3</td>
-<td>16</td>
-</tr>
-<tr>
-<td>Sign</td>
-<td>2</td>
-<td>3</td>
-<td>4</td>
-</tr>
-<tr>
-<td>Term</td>
-<td><font color='red'>4</font></td>
-<td>11</td>
-<td>80</td>
-</tr>
-<tr>
-<td>Token</td>
-<td>1.25</td>
-<td>2</td>
-<td>5</td>
-</tr>
-<tr>
-<td>Token.Type</td>
-<td>n&#x2F;a</td>
-<td>n&#x2F;a</td>
-<td>0</td>
-</tr>
-<tr>
-<td>TriFactor</td>
-<td>1.74</td>
-<td>6</td>
-<td>40</td>
-</tr>
-<tr>
-<td>Var</td>
-<td>1</td>
-<td>1</td>
-<td>5</td>
-</tr>
-</tbody></table>
-<p>从上表可以看出，复杂度较高的两个类分别是Lexer和Term。Lexer复杂度较高是因为有一串很长的if-else判断用于将输入转化成Token。Term复杂度很大则是因为在化简部分存在许多分支。</p>
-<p>下面是部分复杂方法的复杂度：</p>
-<table>
-<thead>
-<tr>
-<th>Method</th>
-<th>CogC</th>
-<th>ev(G)</th>
-<th>iv(G)</th>
-<th>v(G)</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>DefinedFunction.initial()</td>
-<td>12</td>
-<td>1</td>
-<td>5</td>
-<td>5</td>
-</tr>
-<tr>
-<td>Expr.combine()</td>
-<td>21</td>
-<td>4</td>
-<td>8</td>
-<td>8</td>
-</tr>
-<tr>
-<td>Expr.print()</td>
-<td>12</td>
-<td>3</td>
-<td>7</td>
-<td>8</td>
-</tr>
-<tr>
-<td>Lexer.Lexer(String)</td>
-<td>17</td>
-<td>1</td>
-<td>17</td>
-<td>17</td>
-</tr>
-<tr>
-<td>Lexer.checkStyle(String)</td>
-<td>13</td>
-<td>7</td>
-<td>8</td>
-<td>10</td>
-</tr>
-<tr>
-<td>Term.integrate(Num, Term, Num)</td>
-<td>15</td>
-<td>7</td>
-<td>7</td>
-<td>10</td>
-</tr>
-<tr>
-<td>Term.integrateAns(ArrayList&lt;Factor&gt;,  ArrayList&lt;Factor&gt;, ArrayList&lt;Factor&gt;, Num, Num, int, int)</td>
-<td>16</td>
-<td>8</td>
-<td>10</td>
-<td>12</td>
-</tr>
-<tr>
-<td>Term.print(boolean)</td>
-<td>15</td>
-<td>3</td>
-<td>10</td>
-<td>10</td>
-</tr>
-<tr>
-<td>Term.solveTriFactor(Factor,  ArrayList&lt;Factor&gt;, ArrayList&lt;Factor&gt;, ArrayList&lt;Factor&gt;,  int, int)</td>
-<td>25</td>
-<td>4</td>
-<td>7</td>
-<td>11</td>
-</tr>
-<tr>
-<td>Average</td>
-<td>1.68</td>
-<td>1.29</td>
-<td>2</td>
-<td>2.11</td>
-</tr>
-</tbody></table>
-<p>solveTriFactor是一个对三角函数化简的方法，整体来看，复杂度最高的方法集中在化简部分。这再一次说明了化简有风险，debug需谨慎。抛开化简以外，全部方法的平均复杂度比较低，说明我的方法设计比较优美，可喜可贺。</p>
-<h3 id="心得体会"><a href="#心得体会" class="headerlink" title="心得体会"></a>心得体会</h3><p>第一单元的作业可以说是不太顺利，代码难度不高却因为一些简单的错误失去了很多分数。真情实感就是很难受。</p>
-<p>难受归难受，第一单元的作业也是让我体会到了面向对象的感觉，其核心就是要把各种“东西”看成一个整体，调用抽象的方法对其进行处理，所以递归是一种非常常用的方法。递归时不需要关注下一层如何实现，只需要完成本层的内容即可。</p>
-<p>此外，代码量也有所提升，虽然一个一个方法相互独立，但必须要规划好每一部分的功能方可比较轻松流畅的写完所有代码。</p>
-<p>表达式优化对代码复杂度带来了巨大的提升，导致正常的debug变得困难，需要debug的情况也变得极多。一个必要的处理方法是对化简单独新建一个类，专门处理化简问题。</p>
-<h3 id="课程改进建议"><a href="#课程改进建议" class="headerlink" title="课程改进建议"></a>课程改进建议</h3><p>无</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%B8%80%E5%8D%95%E5%85%83%E5%8D%9A%E5%AE%A2%E4%BD%9C%E4%B8%9A/" data-id="cma5h16zr0005s8ts997lfvsk" data-title="" class="article-share-link"><span class="fa fa-share">分享</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-北航2025面向对象第二单元博客作业" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2025/05/01/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%BA%8C%E5%8D%95%E5%85%83%E5%8D%9A%E5%AE%A2%E4%BD%9C%E4%B8%9A/" class="article-date">
-  <time class="dt-published" datetime="2025-05-01T14:39:04.753Z" itemprop="datePublished">2025-05-01</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h1 id="北航2025面向对象第二单元博客作业"><a href="#北航2025面向对象第二单元博客作业" class="headerlink" title="北航2025面向对象第二单元博客作业"></a>北航2025面向对象第二单元博客作业</h1><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>本单元的基本任务是用多线程解决电梯调度问题，并实现临时调度指令与双轿厢升级指令。</p>
-<p>在第一单元过于追求优化性能反而丢了两次正确性分以后，我决定改变策略尽量追求代码简洁清晰，逻辑明确，尽量保证正确性。</p>
-<h3 id="基本架构"><a href="#基本架构" class="headerlink" title="基本架构"></a>基本架构</h3><p>本单元作业没有进行重构，最终架构如下：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250418101705398.png" alt="image-20250418101705398"></p>
-<p>简化一下图，大致架构如下：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250418101839682.png" alt="image-20250418101839682"></p>
-<p>输入线程输入后，将请求传递给RequestQueue，受到请求后通知Dispatch线程，调度器作为消费者从RequestQueue中获取请求并根据调度策略分配给正确的电梯，调度器作为生产者给ElevatorQueue提供请求。收到请求后访问策略类决定电梯的行动步骤，而后指导电梯线程运行。</p>
-<p>第二次作业加入了临时调度，要求电梯立即移动到某一楼层。可以把该操作看成电梯的原子操作，若请求队列里面收到了临时调度请求，那么立即通知电梯进行临时调度操作即可。另外乘客有可能中途下电梯，应当将这种乘客送回RequestQueue重新调度。</p>
-<p>第三次作业加入了双轿厢请求，要求可以将原本两个单轿厢电梯放到一个电梯井里变成双轿厢电梯。我通过新建共享类的方式解决了该问题：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250418102627771.png" alt="image-20250418102627771"></p>
-<p>SameWell类是一个丑陋的名字，连接了两个同在一个电梯井中的电梯。具体来说，双轿厢的危险点在于两个轿厢可能会在交叉的楼层发生碰撞。因此，在某个电梯轿厢要进入危险楼层时，应当先询问共享类能否进入。若共享类判断危险楼层没有轿厢，可以放行通过，反之则应该告诉该轿厢等待并发出一个催促信号。任意轿厢在危险楼层时都应该检查有无催促信号，如果存在催促信号则要在关门后立即离开危险楼层。</p>
-<p>针对这一部分只需要在共享类里面实现两个Boolean类型的信号，如busy与quickly信号。进入危险楼层时置busy为1，想进入危险楼层时置quickly为1，需要判断能否进入和是否需要离开时写两个方法判断即可。</p>
-<p>UML协作图大致如下：</p>
-<p>主线程：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\MainClass_main.png" alt="MainClass_main"></p>
-<p>调度器线程：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\Dispatch_run.png" alt="Dispatch_run"></p>
-<p>电梯线程：</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\Elevator_run.png" alt="Elevator_run"></p>
-<p>图很长略显复杂，因此解决线程之间的各类竞争问题显得尤为重要。</p>
-<h3 id="同步和锁"><a href="#同步和锁" class="headerlink" title="同步和锁"></a>同步和锁</h3><p>需要这一部分的关键是线程之间运行的速度和顺序是不确定的，因而如果调用了相同的变量，可能会产生不确定的效果。本人在此单元作业中仅使用了synchronized关键字修饰整个方法的方式处理多线程并发问题。</p>
-<p>总结出一个加锁的原则是，在托盘类或者共享类中，许多变量是受两个线程共同使用的，例如请求队列、双轿厢中的busy与quickly等，因此在涉及到这些内容的方法都应该加锁，从而实现对这些量的调用安全。</p>
-<p>另外，对读写锁进行了了解。读写锁即是将锁分成了读锁与写锁两类。lock.readlock()与lock.writelock()。当有人持有写锁时，其余人均不得进入。而无人持有写锁时，那么所有被上了读锁的方法可以同时读，写锁不得进入。是一个读写公平的上锁方式，由于允许了同时读取，提高了多线程的运行效率。</p>
-<p>wait()&#x2F;notify()的方式在我的代码中用来调控线程运行。当一个线程需要等待时，应当wait，wait可以释放出所有持有的锁交给别人，wait需要他人notify，也可以在括号中设置wait的最大时间，线程将在时间到时自动醒来。这种方式可以有效避免轮询浪费CPU时间。</p>
-<p>需要注意的是，notify只会叫醒所有有相同监视器管辖的对象，简单来说，如果有两个上锁的方法一个想叫醒另一个，他俩必须有共同使用的变量。如果他俩毫不相干，那notify是我无效的。第一次作业时我希望让电梯等待时，直接开了一个新方法里面只有一个wait()，然后这个电梯再也醒不过来了。<del>你永远叫不醒一个装睡的线程！</del></p>
-<h3 id="策略"><a href="#策略" class="headerlink" title="策略"></a>策略</h3><p>策略可以分为两部分，一个是决定请求分配给哪个电梯的调度策略，一个是对于单个电梯根据自己的候乘表决定如何运行的运行策略。</p>
-<h4 id="运行策略"><a href="#运行策略" class="headerlink" title="运行策略"></a>运行策略</h4><p>采用LOOK策略改。电梯不断在楼层之间“扫描”，电梯只捎带想去楼层的方向与电梯行进方向相同的乘客。若电梯行进方向前放没有乘客，并且电梯内部没有乘客了，那么电梯掉头。如果候乘表为空，那么电梯休息。如果电梯满员了但还有人要上，则先请优先级较高的乘客上电梯。由于本次作业存在优先级机制，因此在电梯开始运动的时候应当考虑一下往哪边运动。</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250418161832475.png" alt="image-20250418161832475"></p>
-<p>如图所示，如果电梯上方和下方都有人等待电梯，那么电梯先向下运行于先向上运行相比，上方的乘客多等待的时间大约就是电梯向下走到最低楼层的时间的两倍（忽略开关门）。并且考虑到时间的加权公式为：</p>
-<p>$WT&#x3D;\frac{ {\textstyle \sum_{i}^{}(t_i\times w_i)} }{\textstyle \sum_{i}^{}w_i} $</p>
-<p>因此可以考虑比较</p>
-<p>$ {\textstyle \sum_{up}^{}w*(Floor_{now}-Floor_{min})} $</p>
-<p>$ {\textstyle \sum_{down}^{}w*(Floor_{max}-Floor_{now})} $</p>
-<p>两个式子的大小判断电梯从休息状态启动时应该往哪里走，该过程还可以用前缀与后缀和优化。</p>
-<p>此外，考虑到性能分还需要考虑耗电量，而专门为贵客开关门实在是浪费宝贵的电力资源。所以从环保的角度考虑，只在必须开门的时候做好优先级处理即可。</p>
-<h4 id="调度策略"><a href="#调度策略" class="headerlink" title="调度策略"></a>调度策略</h4><p>首先给空电梯分配（不过现在想来这一条最简单的策略是最不合理的，这即增加了巨额耗电量，又实际上没怎么提升时间性能）。</p>
-<p>其次考察双轿厢，如果一个乘客请求的起始楼层与目标楼层均在一个轿厢的，那可以优先分配给这一个轿厢，因为双轿厢的速度更快。</p>
-<p>再其次，如果乘客在与某个电梯当前行进方向相同，并且该行进方向上所有的候乘乘客电梯可以被电梯一趟接完，那么该乘客可以加入该电梯候乘表。</p>
-<p>最后，若没有电梯满足上述条件，直接分配个人最少的电梯。</p>
-<p>另外，考虑到必要的正确性，应当要求单个电梯不能同时接受太多的乘客请求，静默的电梯不能接受请求，双轿厢电梯不能接受接不到的乘客的请求等等。</p>
-<h3 id="bug与debug"><a href="#bug与debug" class="headerlink" title="bug与debug"></a>bug与debug</h3><p>第一次作业未出现bug，也未成功hack他人。</p>
-<p>第二次作业出现了三个bug：</p>
-<p>其一，乘客中途下电梯时我通过记录其当前楼层将其送回调度器重新分配，但这个记录没有深克隆。</p>
-<p>其二，临时调度时如果乘客顺路，我会将该乘客请进电梯，然而这个过程没有判断是否满员。</p>
-<p>其三，如果最后只有临时调度，那我的截至条件将无法判断。</p>
-<p>这三个bug直接让我未进入强测，但是由于某些原因，我成功hack出了一些bug</p>
-<p>其一，有一位同学同样是人处在错误的楼层，没准也是深克隆问题。</p>
-<p>其二，有一位同学在输入很多乘客后同时对6部电梯临时调度，并同时再输入几位乘客，会出现TLE的问题。猜测调度逻辑有误。</p>
-<p>第三次作业出现了一个bug：</p>
-<p>对于程序终止的判断有误，乘客中途下车并重新调度的空挡可能出现线程问题，并且未考虑仅有update的情况。</p>
-<p>这个bug在强测中未被测出，进入互测后hack了三个bug：</p>
-<p>其一，有一位同学的双轿厢电梯中某个轿厢会越过限制，猜测判断条件的优先级有误。</p>
-<p>其二，有一位同学的调度器会出现空指针异常，很奇怪的bug猜测不出问题。</p>
-<p>其三，有一位同学的终止条件有问题，如果最后一条是update会提前终止程序。</p>
-<p>另外还有一位同学的乘客调度会出现错误，本地可以复现但未成功hack。<del>我十分心痛未能帮助该同学指出程序的bug，或许其如今还未能发现自己的程序并不完善，深表遗憾！</del></p>
-<p>我的Debug方法并不完善，通常是直接思考代码逻辑+肉眼。其实效果不错，都能很快的找到bug，但问题在于出错了才能找到bug。第三次作业手搓了一个评测机，正确率大幅提升。</p>
-<h3 id="心得体会"><a href="#心得体会" class="headerlink" title="心得体会"></a>心得体会</h3><p>线程安全问题需要反复思考，思考所有情况下是否能保证变量的读写不混乱。实际上着重保证共享类或者托盘类的线程安全即可。</p>
-<p>层次化设计是要将问题进行提炼，满足高内聚低耦合的基本设计原则，追求代码的简洁性。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%BA%8C%E5%8D%95%E5%85%83%E5%8D%9A%E5%AE%A2%E4%BD%9C%E4%B8%9A/" data-id="cma5h16zs0006s8tsfj0m94zn" data-title="" class="article-share-link"><span class="fa fa-share">分享</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-2024面向对象程序设计与构造先导课心得" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2025/05/01/2024%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E4%B8%8E%E6%9E%84%E9%80%A0%E5%85%88%E5%AF%BC%E8%AF%BE%E5%BF%83%E5%BE%97/" class="article-date">
-  <time class="dt-published" datetime="2025-05-01T14:38:51.538Z" itemprop="datePublished">2025-05-01</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h1 id="2024面向对象程序设计与构造先导课心得"><a href="#2024面向对象程序设计与构造先导课心得" class="headerlink" title="2024面向对象程序设计与构造先导课心得"></a>2024面向对象程序设计与构造先导课心得</h1><h2 id="1-作业最终架构与迭代过程"><a href="#1-作业最终架构与迭代过程" class="headerlink" title="1.作业最终架构与迭代过程"></a>1.作业最终架构与迭代过程</h2><p>Mainclass主类尽可能短小，只放置指导书提供的输入解析，而后设置solve类对输入解析获得的Arraylist分析，根据操作的不同进行不同的处理。对于该冒险游戏的主体部分，必然需要建立冒险者、瓶子、装备这三个最主要的类，每个类中保存各自相关的数值。在迭代中，需要对初始的主体部分不断细化。例如瓶子和装备均有细分的类别，此时我使用子类的方式，每一个类型的瓶子或装备新建一个子类，在子类中重写使用后对冒险者产生的效果这一个方法即可方便的实现对不同类型物品的储存。</p>
-<p>在冒险者类中，背包系统为最为主要的部分，这刻画了冒险者与其他类的从属关系。我通过在Adventure类中建立HashMap的方式，将冒险者拥有的物品全部通过这些HashMap储存即可。同理，冒险者的雇佣关系可以看作是冒险者拥有了一个冒险者，因此也可以通过类似的方法实现。</p>
-<p>最后一次作业中添加了秘境探险，在这一部分中使用接口和工厂模式，设置守卫接口来统一规划各个守卫类，设置宝藏接口和宝藏工厂，在成功打败守卫时，宝藏工厂会生产对应的宝藏给予冒险者使用。</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20241101105701250.png" alt="image-20241101105701250"></p>
-<p>幸运的是，这半学期的作业迭代我没有体验过重构的痛苦。但是还是需要在每一步操作之前，都要思考一下这一步操作是否会影响之前的操作，这一步操作是否会影响之后的操作。例如当初始建立背包时，直接采用HashMap的方式，从而保证了以后可以快速查询对应的物品，以及方便后续为背包添加容量机制。再比如考虑到ce取决于atk与def可能会持续改变，于是初始即建立updateCE方法以保证战斗力的刷新。</p>
-<h2 id="2-使用JUnit的心得体会"><a href="#2-使用JUnit的心得体会" class="headerlink" title="2.使用JUnit的心得体会"></a>2.使用JUnit的心得体会</h2><p>实际上我的JUnit都是由中测数据直接自动生成了一个测试JUnit测试代码，<del>这何尝不算一种自动化测试呢</del>。但时显然，这种方法实际上对检查数据没有作用，只能省时省力地水很高的覆盖率。</p>
-<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20241101114352674.png" alt="image-20241101114352674"></p>
-<p>当然一开始写JUnit，我也发现这种单元化测试的方法实际上很需要技巧。如果上来追求覆盖率，那无疑直接从顶层类开始进行操作最方便，因为这里的方法涉及的其他方法是最多的。然而这样写的测试效果较差，因为一旦报错，从顶到下的所有部分都有可能有一定错误，仍然无法确定问题所在。</p>
-<p>其次，JUnit非常擅长解决Runtime Error相关错误，对于WA则需要断言进行解决，对于更为复杂的方法，这类断言可以一行一行的快速检查，然而对于这学期较为简单的OO作业效果不大还徒增麻烦。因此，我的JUnit更注重边界测试和压力测试，生成较大的数据以及较多类型的数据，看看程序能否成功运行完全。结果上来看，实际上只使用Junit发现过一个错误，效果并不是很好，甚至不如直接肉眼观察法，这里可能需要进一步的思考。</p>
-<h2 id="3-学习OOPre的心得体会"><a href="#3-学习OOPre的心得体会" class="headerlink" title="3.学习OOPre的心得体会"></a>3.学习OOPre的心得体会</h2><p>学了一年面向过程，还没来得及思考便进入了面向对象的学习。感觉面向对象是一件很神奇的事情，好似搭积木，每一步都是显而易见的并且极为简单的，但是按照要求一步一步写就可以完成一个复杂的任务。不确定这是冒险者游戏这个情景的特点还是面向对象本身的特点，也可能都是，总之，确实非常神奇。</p>
-<p>面向对象的重点似乎在于处理各个类的关系，核心要义即使将不同的对象利用简单的方法联系起来，需要其他对象时互相调用，不需要时则互不干扰。这种思维方式，只需要考究对象们本身的特点，而无需再考虑对象们操作的过程究竟如何，设立方法和类的过程如同写一篇说明文，每一段阐述明白对应的特点就能完成任务。</p>
-<p>但是实话说，目前仍然更喜欢面向过程这种记叙文的跌宕起伏，短小精悍。在有限的代码量中能体会到完成不可能任务的奇迹，以及各种预处理埋伏笔，最后通过各种发展砰的一下炸开达到高潮的精彩与快感。这也许是因为目前对于面向对象还是了解较少。(˶‾᷄ ⁻̫ ‾᷅˵)</p>
-<p>另外，必须强调，OOPre的审题极其重要，两次强测bug都仅是因为看错题（如将攻击力看成战斗力），或手误（如递归攻击没有减耐久度）。三个bug仅仅修改四行代码就全部解决，却卡掉了一大半数据点，实在是遗憾。<del>改的快觉得强测前就应该能写好，改的慢又觉得太菜开始焦虑</del>。也许我应该思考思考如何审这种长题了(-｡-;</p>
-<h2 id="4-对OOPre课程的简单建议"><a href="#4-对OOPre课程的简单建议" class="headerlink" title="4.对OOPre课程的简单建议"></a>4.对OOPre课程的简单建议</h2><p>1.希望作业描述稍微有趣一点（</p>
-<p>2.希望进一步增加测试相关内容的指导）</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2025/05/01/2024%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E4%B8%8E%E6%9E%84%E9%80%A0%E5%85%88%E5%AF%BC%E8%AF%BE%E5%BF%83%E5%BE%97/" data-id="cma5h16zd0000s8ts2ece7g5k" data-title="" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2025/05/01/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" data-id="cma5hrxti0000bsts0i9z99fq" data-title="Lab0实验报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -829,23 +229,11 @@
       <ul>
         
           <li>
-            <a href="/2025/05/01/Lab2%20%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/">(no title)</a>
+            <a href="/2025/05/01/Lab0%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/">Lab0实验报告</a>
           </li>
         
           <li>
-            <a href="/2025/05/01/Lab1%20%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/">(no title)</a>
-          </li>
-        
-          <li>
-            <a href="/2025/05/01/Lab0%20%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/">(no title)</a>
-          </li>
-        
-          <li>
-            <a href="/2025/05/01/Lab3%20%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/">(no title)</a>
-          </li>
-        
-          <li>
-            <a href="/2025/05/01/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%B8%80%E5%8D%95%E5%85%83%E5%8D%9A%E5%AE%A2%E4%BD%9C%E4%B8%9A/">(no title)</a>
+            <a href="/2025/05/01/hello-world/">Hello World</a>
           </li>
         
       </ul>
