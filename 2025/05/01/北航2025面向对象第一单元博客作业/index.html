@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>小叶子的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="北航2025面向对象第一单元博客作业前言本单元的基本任务是完成含变量、三角、导数和自定义函数的带幂次表达式解析并展开所有括号。额外任务是将展开后的表达式化简使其尽可能简短。 在经过先导课程的洗礼之后，第一次作业一上来还是极其手足无措的，不过好在，我通过三次迭代逐渐体会到了面向对象的感觉。 基本架构在main类中按时间依次执行读入、解析、展开化简、输出四个步骤。 建立表达式、项、因子三个类（没有像其">
+<meta property="og:type" content="article">
+<meta property="og:title" content="小叶子的博客">
+<meta property="og:url" content="http://example.com/2025/05/01/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%B8%80%E5%8D%95%E5%85%83%E5%8D%9A%E5%AE%A2%E4%BD%9C%E4%B8%9A/index.html">
+<meta property="og:site_name" content="小叶子的博客">
+<meta property="og:description" content="北航2025面向对象第一单元博客作业前言本单元的基本任务是完成含变量、三角、导数和自定义函数的带幂次表达式解析并展开所有括号。额外任务是将展开后的表达式化简使其尽可能简短。 在经过先导课程的洗礼之后，第一次作业一上来还是极其手足无措的，不过好在，我通过三次迭代逐渐体会到了面向对象的感觉。 基本架构在main类中按时间依次执行读入、解析、展开化简、输出四个步骤。 建立表达式、项、因子三个类（没有像其">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="c:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250320143033393.png">
+<meta property="og:image" content="c:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250320145909121.png">
+<meta property="og:image" content="c:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250320150258983.png">
+<meta property="og:image" content="c:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250320153416920.png">
+<meta property="article:published_time" content="2025-05-01T14:39:04.785Z">
+<meta property="article:modified_time" content="2025-03-21T02:23:40.728Z">
+<meta property="article:author" content="xiaoyezi2007">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="c:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250320143033393.png">
+  
+    <link rel="alternate" href="/atom.xml" title="小叶子的博客" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">小叶子的博客</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">一点记录</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS 订阅"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="搜索"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-北航2025面向对象第一单元博客作业" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2025/05/01/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%B8%80%E5%8D%95%E5%85%83%E5%8D%9A%E5%AE%A2%E4%BD%9C%E4%B8%9A/" class="article-date">
+  <time class="dt-published" datetime="2025-05-01T14:39:04.785Z" itemprop="datePublished">2025-05-01</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="北航2025面向对象第一单元博客作业"><a href="#北航2025面向对象第一单元博客作业" class="headerlink" title="北航2025面向对象第一单元博客作业"></a>北航2025面向对象第一单元博客作业</h1><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>本单元的基本任务是完成含变量、三角、导数和自定义函数的带幂次表达式解析并展开所有括号。额外任务是将展开后的表达式化简使其尽可能简短。</p>
+<p>在经过先导课程的洗礼之后，第一次作业一上来还是极其手足无措的，不过好在，我通过三次迭代逐渐体会到了面向对象的感觉。</p>
+<h3 id="基本架构"><a href="#基本架构" class="headerlink" title="基本架构"></a>基本架构</h3><p>在main类中按时间依次执行读入、解析、展开化简、输出四个步骤。</p>
+<p>建立表达式、项、因子三个类（没有像其他很多同学设置单项式和多项式类，我认为单项式和多项式都可以视作表达式直接处理），这三个类相互协作即可完成全部任务。</p>
+<p>​	1.读入部分：scanner依次读入自定义函数和需要化简的表达式，并转化为不同Token</p>
+<p>​	2.解析：利用递归下降写parser类，向下解析每一层表达式。</p>
+<p>​	3.展开化简：核心是写一个simplified方法，表达式的simplified即可向下转化成若干项的simplified，项的simplified又可以向下转化成若干因子的simplified。所有simplified都返回一个表达式，这样可以将展开化简转化成表达式之间的运算。一个简单的思维导图如下：</p>
+<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250320143033393.png" alt="image-20250320143033393"></p>
+<p>​	4.输出：递归下降输出每一个实例，并对项之间的输出顺序做简单调整。</p>
+<p>类图如下：</p>
+<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250320145909121.png" alt="image-20250320145909121"></p>
+<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250320150258983.png" alt="image-20250320150258983"></p>
+<p>采用IDEA生成类和方法，再自行根据调用连接箭头的方式画出了类图。就美观而言我认为类图还是相对比较优美的，形成了一个扎实对称的三角形，具有很强的稳定性。</p>
+<p>考虑如果未来变量不止存在x，三角因子和函数调用内部不止输入因子，我的代码都可以快速实现。若幂次允许存在变量，由于我设置了power类也可以快速实现。若需要添加新的因子如数列求和因子等，则可类似加入求导因子一般，建立一个新的因子类与因子接口连接，实现所有接口内的方法即可。</p>
+<p>下面我将具体分析我的迭代过程：</p>
+<h3 id="第一次迭代"><a href="#第一次迭代" class="headerlink" title="第一次迭代"></a>第一次迭代</h3><h4 id="我的实现"><a href="#我的实现" class="headerlink" title="我的实现"></a>我的实现</h4><p>第一次作业只需要实现多项式化简，也许正是因为这一点，许多同学直接新建多项式和单项式类。我考虑到单项式的可拓展性较差，不如直接对Term化简，也能完成相似的任务。同时我还考虑了一些未来可能出现的情况，如需要化简一个多变量表达式。对此，我的Term必然需要采用Arraylist存储不同的因子，而非直接用HashMap存储系数和幂次（虽然第一次作业只可能出现一个Factor），另外，在合并时直接遍历所有的非常熟Factor是否相同再进行合并即可。正是这一步考虑让我后面的迭代不存在任何重构。</p>
+<p>对于其他实现上的细节：</p>
+<p>1.Term类中需要写一个getNum方法，以快速找到常数项（这是没有写单项式类需要额外做的唯一事情），若没有常数项则填一个1上去。</p>
+<p>2.我给变量参数x和指数power都额外设置了一个类，以防后续会在指数和变量上做文章，结果来看属于冗余设计。</p>
+<h4 id="Bug-Hack"><a href="#Bug-Hack" class="headerlink" title="Bug &amp; Hack"></a>Bug &amp; Hack</h4><p>由于许久没有写Java程序了，在代码中犯了一个重大错误：部分分析没有深克隆，导致方法中的运算改变了方法的参数。该bug我在写完全部程序才发现，而debug的方式也非常简单，通过构造样例二分缩小范围，寻找数据在哪里意外发生变化即可。</p>
+<p>其余bug是对0次幂的处理不完全，在幂因子处没有换成1，属于低级错误。</p>
+<p>第一次作业只hack到一位同学，该同学对0次幂的处理有些问题，略微构造数据即可发现其问题。</p>
+<h4 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h4><p>进行普通的单项式合并后表达式已然化到最简，剩余的唯一一个优化是如果整个表达式中存在正的Term，则第一项先输出正项，从而少输出一个符号。该优化写在输出类中不会增加多少代码复杂度。</p>
+<h3 id="第二次迭代"><a href="#第二次迭代" class="headerlink" title="第二次迭代"></a>第二次迭代</h3><h4 id="我的实现-1"><a href="#我的实现-1" class="headerlink" title="我的实现"></a>我的实现</h4><p>鉴于我第一次的架构比较可拓展，添加一个三角因子没有造成任何影响，合并不同项仍然是判断因子是否全部相同。</p>
+<p>而自定义递归函数则稍显复杂。首先递归函数的解析比较暴力，需要一个一个手动跳过大括号，读入数字，再跳过小括号，读入各因子，再跳过等号，读入表达式等等。幸好这些只需要在一个输入类写完即可。而后我才用预处理的方式，先计算出所有不大于5的函数值，需要时直接用一个方法调用计算即可。由于调用时还需要用因子替换形式参数，所以需要再写一个replace方法，该方法读入形式参数和实际调用参数，向下递归调用深层的replace最终完成替换。注意一定要一次读入全部形式参数，依次替换可能会导致先替换y成x，而后再替换x时出现问题。</p>
+<h4 id="优化-1"><a href="#优化-1" class="headerlink" title="优化"></a>优化</h4><p>问题的重点来到了优化，参考评论区精华帖所提到的提取公因式方法，的确可以完成优化，然而过程实在比较复杂，大幅提高了我的代码复杂度，也为这次作业的失败埋下了雷。</p>
+<p><img src="C:\Users\Henson\AppData\Roaming\Typora\typora-user-images\image-20250320153416920.png" alt="image-20250320153416920"></p>
+<p>我通过这一页ppt展示了提取公因式的简短解释，思路简单。</p>
+<p>为同时实现两三角因子括号内因子若恰为相反数的合并。在提取公因式时可认为括号内差一个符号的三角因子也是相同的，并同步记录正负符号。</p>
+<p>而后判断不同的因子的情况：</p>
+<p>若完全没有不同的因子，则直接合并，也就是第一次作业的合并方式。</p>
+<p>若不同的因子恰构成了sin^2+cos^2，则选取系数绝对值较小的那个数，合并这么多的项转化成1.</p>
+<p>若不同的因子恰构成了1-sin^2或1-cos^2，且系数相同，则进行化简。</p>
+<p>若不同的因子恰构成了诸如sincos+cossin之类的和角公式且系数相同，则将括号内的表达式相加并合并成一项。</p>
+<p>合并多个项时，考虑到可能合并后再次参与合并。因此可以将合并后的新项压栈，完成合并后再对栈内的项进行二次合并。</p>
+<p>完成合并后，再输出之前，可以对单项进行简化。若三角因子括号中的项是一个因子加一个负号，则可以将负号吐出三角因子之外并去掉三角因子内的二层括号。</p>
+<h4 id="Bug-Hack-1"><a href="#Bug-Hack-1" class="headerlink" title="Bug&amp;Hack"></a>Bug&amp;Hack</h4><p>构造了一些样例，发现没问题后直接进去强测，然而直接挂了。实在非常痛苦。bug非常低级：因子的replace函数，将cos replace后产生的因子，由于复制粘贴，写成sin了，直接炸了十多个点。此外还有一个小bug是提取公因式时没有深克隆，故若出现类似sin^2cos+2cos^3之类的项时，cos会被新产生的两个项共用，没有分开。</p>
+<p>过了的点只有一个不是100分，然而这没有任何用。</p>
+<p>没进互测，自然没有什么hack经验，也正因没进互测，没有人帮我额外debug，给下一次作业再次埋雷。</p>
+<h3 id="第三次迭代"><a href="#第三次迭代" class="headerlink" title="第三次迭代"></a>第三次迭代</h3><h4 id="我的实现-2"><a href="#我的实现-2" class="headerlink" title="我的实现"></a>我的实现</h4><p>这次迭代再次体现了我架构的优异性，添加普通函数，只需要视作它是n&#x3D;0的递归函数即可。添加求导因子，在simplify时使用求导公式递归解决即可，用了一节早八一个小时就完成了这次迭代。</p>
+<h4 id="Bug-Hack-2"><a href="#Bug-Hack-2" class="headerlink" title="Bug&amp;Hack"></a>Bug&amp;Hack</h4><p>然而，第二次作业的bug发力了，由于我的三角因子创建实例时的接口设置成了factor，导致我每新建一个三角因子都要调用一下复杂度较高的simplify方法，并且我的代码其他地方也存在由于不放心而滥用simplify的现象，理所当然的，我被卡了TLE并被hack两次。</p>
+<p>实际上现在回头来看，在我的架构下，完全可以把三角因子内部的输入视作一个表达式，这样也省去了一步化简过程，减少时间消耗和程序复杂度，可惜当时为了和指导书保持一致没有采取这种方法</p>
+<p>hack别人时，主要针对新加的求导因子，将求导因子内部用0组合构造样例。</p>
+<h3 id="复杂度分析"><a href="#复杂度分析" class="headerlink" title="复杂度分析"></a>复杂度分析</h3><p>先通过IDEA分析类复杂度。</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>OCavg</th>
+<th>OCmax</th>
+<th>WMC</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DaoFactor</td>
+<td>1.08</td>
+<td>2</td>
+<td>14</td>
+</tr>
+<tr>
+<td>DefinedFunction</td>
+<td>1.5</td>
+<td>5</td>
+<td>12</td>
+</tr>
+<tr>
+<td>Expr</td>
+<td>2.63</td>
+<td>8</td>
+<td>50</td>
+</tr>
+<tr>
+<td>ExprFactor</td>
+<td>1.15</td>
+<td>3</td>
+<td>15</td>
+</tr>
+<tr>
+<td>FunctionFactor</td>
+<td>1.19</td>
+<td>3</td>
+<td>19</td>
+</tr>
+<tr>
+<td>Input</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Lexer</td>
+<td><font color='red'>5</font></td>
+<td>15</td>
+<td>25</td>
+</tr>
+<tr>
+<td>MainClass</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Num</td>
+<td>1.04</td>
+<td>2</td>
+<td>28</td>
+</tr>
+<tr>
+<td>Parser</td>
+<td>2.41</td>
+<td>7</td>
+<td>41</td>
+</tr>
+<tr>
+<td>Power</td>
+<td>1.15</td>
+<td>2</td>
+<td>15</td>
+</tr>
+<tr>
+<td>PowerFactor</td>
+<td>1.23</td>
+<td>3</td>
+<td>16</td>
+</tr>
+<tr>
+<td>Sign</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Term</td>
+<td><font color='red'>4</font></td>
+<td>11</td>
+<td>80</td>
+</tr>
+<tr>
+<td>Token</td>
+<td>1.25</td>
+<td>2</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Token.Type</td>
+<td>n&#x2F;a</td>
+<td>n&#x2F;a</td>
+<td>0</td>
+</tr>
+<tr>
+<td>TriFactor</td>
+<td>1.74</td>
+<td>6</td>
+<td>40</td>
+</tr>
+<tr>
+<td>Var</td>
+<td>1</td>
+<td>1</td>
+<td>5</td>
+</tr>
+</tbody></table>
+<p>从上表可以看出，复杂度较高的两个类分别是Lexer和Term。Lexer复杂度较高是因为有一串很长的if-else判断用于将输入转化成Token。Term复杂度很大则是因为在化简部分存在许多分支。</p>
+<p>下面是部分复杂方法的复杂度：</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>CogC</th>
+<th>ev(G)</th>
+<th>iv(G)</th>
+<th>v(G)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DefinedFunction.initial()</td>
+<td>12</td>
+<td>1</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Expr.combine()</td>
+<td>21</td>
+<td>4</td>
+<td>8</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Expr.print()</td>
+<td>12</td>
+<td>3</td>
+<td>7</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Lexer.Lexer(String)</td>
+<td>17</td>
+<td>1</td>
+<td>17</td>
+<td>17</td>
+</tr>
+<tr>
+<td>Lexer.checkStyle(String)</td>
+<td>13</td>
+<td>7</td>
+<td>8</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Term.integrate(Num, Term, Num)</td>
+<td>15</td>
+<td>7</td>
+<td>7</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Term.integrateAns(ArrayList&lt;Factor&gt;,  ArrayList&lt;Factor&gt;, ArrayList&lt;Factor&gt;, Num, Num, int, int)</td>
+<td>16</td>
+<td>8</td>
+<td>10</td>
+<td>12</td>
+</tr>
+<tr>
+<td>Term.print(boolean)</td>
+<td>15</td>
+<td>3</td>
+<td>10</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Term.solveTriFactor(Factor,  ArrayList&lt;Factor&gt;, ArrayList&lt;Factor&gt;, ArrayList&lt;Factor&gt;,  int, int)</td>
+<td>25</td>
+<td>4</td>
+<td>7</td>
+<td>11</td>
+</tr>
+<tr>
+<td>Average</td>
+<td>1.68</td>
+<td>1.29</td>
+<td>2</td>
+<td>2.11</td>
+</tr>
+</tbody></table>
+<p>solveTriFactor是一个对三角函数化简的方法，整体来看，复杂度最高的方法集中在化简部分。这再一次说明了化简有风险，debug需谨慎。抛开化简以外，全部方法的平均复杂度比较低，说明我的方法设计比较优美，可喜可贺。</p>
+<h3 id="心得体会"><a href="#心得体会" class="headerlink" title="心得体会"></a>心得体会</h3><p>第一单元的作业可以说是不太顺利，代码难度不高却因为一些简单的错误失去了很多分数。真情实感就是很难受。</p>
+<p>难受归难受，第一单元的作业也是让我体会到了面向对象的感觉，其核心就是要把各种“东西”看成一个整体，调用抽象的方法对其进行处理，所以递归是一种非常常用的方法。递归时不需要关注下一层如何实现，只需要完成本层的内容即可。</p>
+<p>此外，代码量也有所提升，虽然一个一个方法相互独立，但必须要规划好每一部分的功能方可比较轻松流畅的写完所有代码。</p>
+<p>表达式优化对代码复杂度带来了巨大的提升，导致正常的debug变得困难，需要debug的情况也变得极多。一个必要的处理方法是对化简单独新建一个类，专门处理化简问题。</p>
+<h3 id="课程改进建议"><a href="#课程改进建议" class="headerlink" title="课程改进建议"></a>课程改进建议</h3><p>无</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2025/05/01/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%B8%80%E5%8D%95%E5%85%83%E5%8D%9A%E5%AE%A2%E4%BD%9C%E4%B8%9A/" data-id="cma5h16zr0005s8ts997lfvsk" data-title="" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2025/05/01/Lab3%20%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">前一篇</strong>
+      <div class="article-nav-title">
+        
+          (no title)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2025/05/01/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%BA%8C%E5%8D%95%E5%85%83%E5%8D%9A%E5%AE%A2%E4%BD%9C%E4%B8%9A/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">后一篇</strong>
+      <div class="article-nav-title"></div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/05/">五月 2025</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/05/01/Lab2%20%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2025/05/01/Lab1%20%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2025/05/01/Lab0%20%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2025/05/01/Lab3%20%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2025/05/01/%E5%8C%97%E8%88%AA2025%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%AC%AC%E4%B8%80%E5%8D%95%E5%85%83%E5%8D%9A%E5%AE%A2%E4%BD%9C%E4%B8%9A/">(no title)</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 xiaoyezi2007<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
